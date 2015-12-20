@@ -1,0 +1,14 @@
+
+
+
+
+
+.build/uno-1bd085d3/src/sketch.cpp : src/sketch.ino
+	@mkdir -p .build/uno-1bd085d3/src
+	@echo [93msrc/sketch.ino[0m
+	@/usr/local/Cellar/ino/0.3.6/libexec/bin/ino preproc -d /Applications/Arduino.app/Contents/Resources/Java/ -o $@ $^
+
+
+all : .build/uno-1bd085d3/src/sketch.cpp
+	@true
+

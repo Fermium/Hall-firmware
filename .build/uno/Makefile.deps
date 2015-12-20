@@ -1,0 +1,22 @@
+
+
+
+
+
+
+
+
+	
+
+
+
+
+
+.build/uno/PGA113/dependencies.d : 
+	@echo [96mScanning dependencies of PGA113[0m
+	@mkdir -p .build/uno/PGA113
+	@touch $@;
+
+all : .build/uno/PGA113/dependencies.d
+	@true
+

@@ -30,9 +30,9 @@ MCP3304::MCP3304(int CS) {
 	SPI.begin();
 }
 
-int MCP3304::readAdc(int pin, boolean sgl) {
+int MCP3304::readAdc(int ch, boolean sgl) {
 
-	pin %= 8; //no more then 8 pins
+	ch %= 8; //no more then 8 pins
 
 	SPI.setClockDivider(SPI_CLOCK_DIV16);	//Set Clockdivider for 1MHz SPI freq.
 

@@ -256,7 +256,7 @@ void loop()
                 mode = 1; //shit happens
                 break;
         }
-
+ 
         if ((cycles % 1000) == 0 )
         {
                 //every now and then just update the display

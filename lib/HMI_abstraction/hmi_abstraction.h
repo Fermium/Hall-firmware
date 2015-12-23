@@ -9,7 +9,7 @@
 //12.34  mA||
 //1234.45 O||Vr G=200
 //-123.3 °c||P   100%
-//12.34   V||Vh G=200
+//12.34   V||Vh G=200 
 
 
 #ifndef HMI_abstraction_h

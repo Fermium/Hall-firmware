@@ -3,8 +3,12 @@
 #include <HMI_abstraction.h>
 #include <ClickEncoder.h>
 #include <math.h>
-#include <TimerOne.h>
+#include <TimerOne.h>         // [needed] change with something that is not CC-BY
 
+
+//please use the tag  [needed] for code that need to be fixed
+
+// [needed] move encoder inside HMI
 
 //12.34  mA||
 //1234.45 O||Vr G=200
@@ -51,6 +55,7 @@ void setup()
 //MODES
 //each mode return the next mode. it usually is itself, but can be
 //another one to jump in the menu
+
 //hall: current mode, just update lcd
 char mode_1(int increment)
 {
@@ -58,11 +63,11 @@ char mode_1(int increment)
         float voltage_reference = 5.0;
         float current;
 
-        //remember IT guis, viva il re' d'italia
+        //remember IT guys, viva il re' d'italia
         current = ((( 5.0 * adc.readSgl(0) ) / 4096 ) / shunt_resistor );
 
         char lcd_string[9];
-        //#code print float
+        // [needed] code print float
         HMI.Write(1, lcd_string);
 
         return 3;
@@ -75,26 +80,106 @@ char mode_2(int increment)
 //hall: resistance selected, just update lcd
 char mode_3(int increment)
 {
+        float shunt_resistor = 100.0;
+        float voltage_reference = 5.0;
+        float voltage;
+        float current;
+        float resistance;
+
+        // [needed] fix adc channels
+        current = ((( 5.0 * adc.readSgl(0) ) / 4096 ) / shunt_resistor );
+        voltage = (( 5.0 * adc.readSgl(1) ) / 4096 );
+        resistance = voltage / current;
+
+        // [needed] code print float
         return 4;
 }
 //hall: resistance gain selected, update resistance gain and LCD
 char mode_4(int increment)
 {
+
+        // [needed] everything
+
+        //un modo carino per fare i giretti dell'indice potrebbe essere
+        //indice = (indice + increment) % 8
+
         return 4;
 }
 //hall: temperature selected, update LCD and check foor overheating
 char mode_5(int increment)
 {
+        float voltage;
+        float temperature_zero_volt = 2.5;
+        float temperature_voltage_gain = 0.01; // mV/°C
+        int temperature_overheat_limit = 150;
+        float temperature;
+
+
+        // [needed] fix adc channels
+        voltage = (( 5.0 * adc.readSgl(3) ) / 4096 );
+        temperature = (voltage - temperature_zero_volt) /  temperature_voltage_gain;
+
+        // [needed] code print float
+
+        if ( temperature > temperature_overheat_limit )
+        {
+                // [needed] code print error
+                // [needed] fix pin
+                // [needed] reeeeealy pin that pin to ground with a cycle
+                analogWrite(0, 0);
+        }
+
         return 6;
 }
+
 //hall: heating element power selected, update it and LCD
 char mode_6(int increment)
 {
+        float voltage;
+        float temperature_zero_volt = 2.5;
+        float temperature_voltage_gain = 0.01; // mV/°C
+        int temperature_overheat_limit = 150;
+        static int power_percentage;
+        float temperature;
+
+        // [needed] fix adc channels
+        // [needed] change with precalculated LSBs value
+        voltage = (( 5.0 * adc.readSgl(3) ) / 4096 );
+        temperature = (voltage - temperature_zero_volt) /  temperature_voltage_gain;
+
+
+        if ( temperature < temperature_overheat_limit ) //if temperature normal
+        {
+                power_percentage += ( increment % 100 );
+                if (power_percentage >100)
+                        power_percentage = 100;
+                else if (power_percentage < 0)
+                        power_percentage = 0;
+
+        }
+        else //IT'S ALL BURNING TO FLAMESSSSS MUAHAHAHAH devil !
+        {
+                // [needed] code print error
+                // [needed] fix pin
+                analogWrite(0, 0);
+                // [needed] reeeeealy pin that pin to ground with a cycle
+                power_percentage = 0;
+        }
         return 6;
 }
 //hall: hall voltage selected, update LCD
 char mode_7(int increment)
 {
+        float voltage_reference = 5.0;
+        float voltage;
+
+        voltage = (( 5.0 * adc.readSgl(0) ) / 4096 );
+        // [needed] adjust range based on PGA
+        char lcd_string[9];
+        // [needed] code print float
+        HMI.Write(7, lcd_string);
+
+
         return 8;
 }
 //hall: hall gain selected, update value and LCD
@@ -185,4 +270,5 @@ void loop()
                 mode_8(0);
         }
 
+        //[needed] update LCD
 }

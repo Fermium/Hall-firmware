@@ -3,6 +3,7 @@
 #include <HMI_abstraction.h>
 #include <ClickEncoder.h>
 #include <math.h>
+#include <TimerOne.h>
 
 
 //12.34  mA||
@@ -19,16 +20,14 @@
 #define apparatus_hall
 
 
+
 //initialize PGAs
 PGA113 pga_vh(10);
 PGA113 pga_vr(11);
 PGA113 pga_3(12);
 MCP3304 adc(13);
-HMI_abstraction HMI();
+HMI_abstraction HMI;
 ClickEncoder *encoder;
-
-//encoder on pin 2,3
-
 
 
 //periodic subroutine called every 1ms
@@ -167,6 +166,9 @@ void loop()
                 break;
         case 8:
                 mode = mode_8(encoder_notches);
+                break;
+        default:
+                mode = 1; //shit happens
                 break;
         }
 

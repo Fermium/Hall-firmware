@@ -52,24 +52,45 @@ void setup()
 
 }
 
+
 //MODES
 //each mode return the next mode. it usually is itself, but can be
 //another one to jump in the menu
 
-//hall: current mode, just update lcd
+//hall: current mode, just update lcd.
+//Current is always measured in mA on a fixed scale with 2 decilmal points
+//format: 99.99mA fixed range
 char mode_1(int increment)
 {
+        //[needed] brig this values to global
         float shunt_resistor = 100.0;
         float voltage_reference = 5.0;
         float current;
+
 
         //remember IT guys, viva il re' d'italia
         current = ((( 5.0 * adc.readSgl(0) ) / 4096 ) / shunt_resistor );
 
         char lcd_string[9];
-        // [needed] code print float
-        HMI.Write(1, lcd_string);
+        char sign;
 
+        unsigned int integer_part;
+        unsigned int floating_part;
+
+        integer_part = trunc(current);
+        floating_part = ((current - integer_part)*100);
+        if (current > 0)
+                sign = ' ';
+        else
+        {
+                integer_part = -integer_part;
+                floating_part = -floating_part;
+                sign = '-';
+        }
+
+        sprintf(lcd_string, "%c%2d.%02d", sign, integer_part, floating_part);
+
+        HMI.Write(1, lcd_string);
         return 3;
 }
 //hall: nothing selected, nothing to do
@@ -78,8 +99,10 @@ char mode_2(int increment)
         return 3;
 }
 //hall: resistance selected, just update lcd
+//format 999.9 , 9999.9 would be waaaay better
 char mode_3(int increment)
 {
+        //[needed] move to global
         float shunt_resistor = 100.0;
         float voltage_reference = 5.0;
         float voltage;
@@ -87,10 +110,32 @@ char mode_3(int increment)
         float resistance;
 
         // [needed] fix adc channels
+
         current = ((( 5.0 * adc.readSgl(0) ) / 4096 ) / shunt_resistor );
         voltage = (( 5.0 * adc.readSgl(1) ) / 4096 );
         resistance = voltage / current;
 
+
+        char lcd_string[9];
+        char sign;
+
+        unsigned int integer_part;
+        unsigned int floating_part;
+
+        integer_part = trunc(resistance);
+        floating_part = ((resistance - integer_part)*10);
+        if (resistance > 0)
+                sign = ' ';
+        else
+        {
+                integer_part = -integer_part;
+                floating_part = -floating_part;
+                sign = '-';
+        }
+
+        sprintf(lcd_string, "%c%3d.%01d", sign, integer_part, floating_part);
+
+        HMI.Write(3, lcd_string);
         // [needed] code print float
         return 4;
 }
@@ -129,6 +174,27 @@ char mode_5(int increment)
                 analogWrite(0, 0);
         }
 
+        char lcd_string[9];
+        char sign;
+
+        unsigned int integer_part;
+        unsigned int floating_part;
+
+        integer_part = trunc(temperature);
+        floating_part = ((temperature - integer_part)*100);
+        if (temperature > 0)
+                sign = ' ';
+        else
+        {
+                integer_part = -integer_part;
+                floating_part = -floating_part;
+                sign = '-';
+        }
+
+        sprintf(lcd_string, "%c%2d.%02d", sign, integer_part, floating_part);
+
+
+        HMI.Write(5, lcd_string);
         return 6;
 }
 
@@ -147,6 +213,7 @@ char mode_6(int increment)
         voltage = (( 5.0 * adc.readSgl(3) ) / 4096 );
         temperature = (voltage - temperature_zero_volt) /  temperature_voltage_gain;
 
+        char lcd_string[9];
 
         if ( temperature < temperature_overheat_limit ) //if temperature normal
         {
@@ -155,7 +222,7 @@ char mode_6(int increment)
                         power_percentage = 100;
                 else if (power_percentage < 0)
                         power_percentage = 0;
-
+                sprintf(lcd_string, "%d %%", power_percentage);
         }
         else //IT'S ALL BURNING TO FLAMESSSSS MUAHAHAHAH devil !
         {
@@ -164,28 +231,72 @@ char mode_6(int increment)
                 analogWrite(0, 0);
                 // [needed] reeeeealy pin that pin to ground with a cycle
                 power_percentage = 0;
+                sprintf(lcd_string, "%s", "ERR ");
         }
+
+        HMI.Write(6, lcd_string);
         return 6;
 }
 //hall: hall voltage selected, update LCD
 char mode_7(int increment)
 {
         float voltage_reference = 5.0;
+        float fixed_gain_vhall = 1;
+
         float voltage;
 
         voltage = (( 5.0 * adc.readSgl(0) ) / 4096 );
-        // [needed] adjust range based on PGA
+        voltage /= pga_vh.GetSetGain();
+        voltage *= fixed_gain_vhall;
+
         char lcd_string[9];
-        // [needed] code print float
+
+        //for now, during debug, let's use just a fixed mV range 0001-9999mV
+        //something like 123.4mV would be probably better, as well as a 1.234mV
+        sprintf(lcd_string, "%4d", voltage * 1000);
+
+
+
+        /*
+        char sign;
+
+        unsigned int integer_part;
+        unsigned int floating_part;
+
+        integer_part = trunc(voltage);
+        floating_part = ((voltage - integer_part)*100);
+        if (voltage > 0)
+                sign = ' ';
+        else
+        {
+                integer_part = -integer_part;
+                floating_part = -floating_part;
+                sign = '-';
+        }
+
+        sprintf(lcd_string, "%c%2d.%02d", sign, integer_part, floating_part);
+
+        */
+
+
         HMI.Write(7, lcd_string);
 
 
         return 8;
 }
 //hall: hall gain selected, update value and LCD
+//[needed] could use less memory...
 char mode_8(int increment)
-{
-        return 8;
+{       int set_gain;
+        set_gain = pga_vh.GetSetGain();
+
+        char lcd_string[9];
+
+        sprintf(lcd_string, "%2d", set_gain);
+
+        HMI.Write(8, lcd_string);
+
+        return 1;
 }
 
 void loop()
@@ -194,6 +305,7 @@ void loop()
         int16_t encoder_notches;
         unsigned long int cycles = 0; //cycles of loop since the apparatus has been powered
 
+        //parse the button of the encoder user input
         ClickEncoder::Button b = encoder->getButton(); //b is button status
         if(b != ClickEncoder::Open) //if the button has been pressed
         {
@@ -256,7 +368,7 @@ void loop()
                 mode = 1; //shit happens
                 break;
         }
- 
+
         if ((cycles % 1000) == 0 )
         {
                 //every now and then just update the display

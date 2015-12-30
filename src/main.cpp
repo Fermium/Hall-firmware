@@ -13,7 +13,7 @@
 //12.34  mA||
 //1234.45 O||Vr G=200
 //-123.3 °c||P   100%
-//12.34   V||Vh G=200
+//12.34  mV||Vh G=200
 
 //1 current     - 2 none
 //3 resistance  - 4 resistance gain
@@ -142,7 +142,7 @@ char mode_3(int increment)
 //hall: resistance gain selected, update resistance gain and LCD
 char mode_4(int increment)
 {
-        static unsigned int index;
+        static unsigned int index = 0;
         index = (index + increment) % 8;
 
         pga_vr.Set(char (index), 0);
@@ -239,6 +239,7 @@ char mode_6(int increment)
         return 6;
 }
 //hall: hall voltage selected, update LCD
+//format:
 char mode_7(int increment)
 {
         float voltage_reference = 5.0;
@@ -254,30 +255,29 @@ char mode_7(int increment)
 
         //for now, during debug, let's use just a fixed mV range 0001-9999mV
         //something like 123.4mV would be probably better, as well as a 1.234mV
+
         sprintf(lcd_string, "%4d", voltage * 1000);
 
-
-
         /*
-        char sign;
+           char sign;
 
-        unsigned int integer_part;
-        unsigned int floating_part;
+           unsigned int integer_part;
+           unsigned int floating_part;
 
-        integer_part = trunc(voltage);
-        floating_part = ((voltage - integer_part)*100);
-        if (voltage > 0)
+           integer_part = trunc(voltage);
+           floating_part = ((voltage - integer_part)*100);
+           if (voltage > 0)
                 sign = ' ';
-        else
-        {
+           else
+           {
                 integer_part = -integer_part;
                 floating_part = -floating_part;
                 sign = '-';
-        }
+           }
 
-        sprintf(lcd_string, "%c%2d.%02d", sign, integer_part, floating_part);
+           sprintf(lcd_string, "%c%2d.%02d", sign, integer_part, floating_part);
 
-        */
+         */
 
 
         HMI.Write(7, lcd_string);
@@ -286,14 +286,15 @@ char mode_7(int increment)
         return 7;
 }
 //hall: hall gain selected, update value and LCD
-//[needed] could use less memory...
 char mode_8(int increment)
-{       int set_gain;
-        set_gain = pga_vh.GetSetGain();
+{
+        static unsigned int index = 0;
+        index = (index + increment) % 8;
+
+        pga_vh.Set(char (index), 0);
 
         char lcd_string[9];
-
-        sprintf(lcd_string, "%2d", set_gain);
+        sprintf(lcd_string, "%d", pga_vh.GetSetGain() );
 
         HMI.Write(8, lcd_string);
 
@@ -311,20 +312,20 @@ void loop()
         if(b != ClickEncoder::Open) //if the button has been pressed
         {
                 switch (b) {
-                case ClickEncoder::Pressed:
-                case ClickEncoder::Clicked:
+                case ClickEncoder::Pressed :
+                case ClickEncoder::Clicked :
                         if (mode > 0 && mode < 8)// 8>mode>0
                                 mode++;
                         else //mode is either 8 and need to rotate to zero or fucked up
                                 mode = 1;
                         break;
-                case ClickEncoder::Held:
+                case ClickEncoder::Held :
                         //nothing to do, really
                         break;
-                case ClickEncoder::Released:
+                case ClickEncoder::Released :
                         //nothing to do, really
                         break;
-                case ClickEncoder::DoubleClicked:
+                case ClickEncoder::DoubleClicked :
                         if (mode > 0 && mode < 7)// 8>mode>=0
                                 mode+=2;
                         else if (mode >= 7 && mode <= 8) //rotate

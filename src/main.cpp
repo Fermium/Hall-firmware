@@ -58,7 +58,6 @@ void setup()
 //another one to jump in the menu
 
 //hall: current mode, just update lcd.
-//Current is always measured in mA on a fixed scale with 2 decilmal points
 //format: 99.99mA fixed range
 char mode_1(int increment)
 {
@@ -91,7 +90,7 @@ char mode_1(int increment)
         sprintf(lcd_string, "%c%2d.%02d", sign, integer_part, floating_part);
 
         HMI.Write(1, lcd_string);
-        return 3;
+        return 1;
 }
 //hall: nothing selected, nothing to do
 char mode_2(int increment)
@@ -99,22 +98,23 @@ char mode_2(int increment)
         return 3;
 }
 //hall: resistance selected, just update lcd
-//format 999.9 , 9999.9 would be waaaay better
+//hall format: 9999.9 fixed range
 char mode_3(int increment)
 {
         //[needed] move to global
         float shunt_resistor = 100.0;
         float voltage_reference = 5.0;
+        float fixed_gain_vres = 1.0;
         float voltage;
         float current;
         float resistance;
 
         // [needed] fix adc channels
-
         current = ((( 5.0 * adc.readSgl(0) ) / 4096 ) / shunt_resistor );
         voltage = (( 5.0 * adc.readSgl(1) ) / 4096 );
+        voltage /= pga_vr.GetSetGain(); //compensate for PGA gain
+        voltage *= fixed_gain_vres;     //compensate for INSTR-AMP gain
         resistance = voltage / current;
-
 
         char lcd_string[9];
         char sign;
@@ -132,25 +132,28 @@ char mode_3(int increment)
                 floating_part = -floating_part;
                 sign = '-';
         }
-
-        sprintf(lcd_string, "%c%3d.%01d", sign, integer_part, floating_part);
+        //[needed] check and fix format
+        sprintf(lcd_string, "%c%4d.%01d", sign, integer_part, floating_part);
 
         HMI.Write(3, lcd_string);
         // [needed] code print float
-        return 4;
+        return 3;
 }
 //hall: resistance gain selected, update resistance gain and LCD
 char mode_4(int increment)
 {
+        static unsigned int index;
+        index = (index + increment) % 8;
 
-        // [needed] everything
+        pga_vr.Set(char (index), 0);
 
-        //un modo carino per fare i giretti dell'indice potrebbe essere
-        //indice = (indice + increment) % 8
+        char lcd_string[9];
+        sprintf(lcd_string, "%d", pga_vr.GetSetGain() );
+        HMI.Write(4, lcd_string);
 
         return 4;
 }
-//hall: temperature selected, update LCD and check foor overheating
+//hall: temperature selected, update LCD and check for overheating
 char mode_5(int increment)
 {
         float voltage;
@@ -164,7 +167,6 @@ char mode_5(int increment)
         voltage = (( 5.0 * adc.readSgl(3) ) / 4096 );
         temperature = (voltage - temperature_zero_volt) /  temperature_voltage_gain;
 
-        // [needed] code print float
 
         if ( temperature > temperature_overheat_limit )
         {
@@ -193,9 +195,8 @@ char mode_5(int increment)
 
         sprintf(lcd_string, "%c%2d.%02d", sign, integer_part, floating_part);
 
-
         HMI.Write(5, lcd_string);
-        return 6;
+        return 5;
 }
 
 //hall: heating element power selected, update it and LCD
@@ -282,7 +283,7 @@ char mode_7(int increment)
         HMI.Write(7, lcd_string);
 
 
-        return 8;
+        return 7;
 }
 //hall: hall gain selected, update value and LCD
 //[needed] could use less memory...
@@ -296,7 +297,7 @@ char mode_8(int increment)
 
         HMI.Write(8, lcd_string);
 
-        return 1;
+        return 8;
 }
 
 void loop()

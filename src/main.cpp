@@ -43,14 +43,10 @@
 
   //initialize PGAs
   MCP3304 adc(13);
-
-
 #endif
-
 
 HMI_abstraction HMI; //HMI is a wrapper around the LCD library
 ClickEncoder *encoder;
-
 
 //periodic subroutine called every 1ms
 void timerIsr() {
@@ -132,7 +128,6 @@ char mode_3(int increment)
         float current;
         float resistance;
 
-
         // [needed] fix adc channels
         current = ((( 5.0 * adc.readSgl(_adc_channel_current) ) / 8192 ) / shunt_resistor );
         voltage = (( 5.0 * adc.readSgl(_adc_channel_vr) ) / 8192 );
@@ -192,12 +187,9 @@ char mode_5(int increment)
         int temperature_overheat_limit = 150;
         float temperature;
 
-
         // [needed] fix adc channels
         voltage = (( 5.0 * adc.readSgl(_adc_channel_temp) ) / 8192 );
         temperature = (voltage - temperature_zero_volt) /  temperature_voltage_gain;
-
-
 
         char lcd_string[9];
         char sign;
@@ -358,8 +350,8 @@ char mode_8(int increment)
 void loop()
 {
         static char mode = 0;
-        int16_t encoder_notches;
-        unsigned long int cycles = 0; //cycles of loop since the apparatus has been powered
+        int16_t encoder_notches = 0;
+        static unsigned long int cycles = 0; //cycles of loop since the apparatus has been powered
 
         //parse the button of the encoder user input
         ClickEncoder::Button b = encoder->getButton(); //b is button status
@@ -425,9 +417,10 @@ void loop()
                 break;
         }
 
-        if ((cycles % 1000) == 0 )
+        if (   ( (cycles % 1000) == 0 )  &&  ( encoder_notches == 0 ) )
         {
                 //every now and then just update the display
+                //if no user interaction has occurred
                 mode_1(0);
                 mode_2(0);
                 mode_3(0);
@@ -438,5 +431,5 @@ void loop()
                 mode_8(0);
         }
 
-        //[needed] update LCD
+        encoder_notches = 0;
 }

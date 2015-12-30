@@ -231,11 +231,12 @@ char mode_6(int increment)
         {
                 // [needed] code print error
                 // [needed] fix pin
-                for(char i=0, i!=50, i++){
+                for(char i=0; i!=50; i++)
+                {
 
-                  digitalWrite(_pin_heater, LOW);
-                  analogWrite(_pin_heater, 0);
-        }
+                        digitalWrite(_pin_heater, LOW);
+                        analogWrite(_pin_heater, 0);
+                }
 
                 // [needed] reeeeealy pin that pin to ground with a cycle
                 power_percentage = 0;
@@ -276,7 +277,7 @@ char mode_7(int increment)
            gain di 200 sarebbe 5uV in entrata quindi 0.005mV
 
            tuttavia da manuale a 30mA di corrente troviamo una Vhall max di 0.07V
-           ovvero 70mV, arrotondiamo 99V.
+           ovvero 70mV, arrotondiamo 99mV.
 
            Un range migliore è quindi +99.999mV fixed range
          */
@@ -303,7 +304,6 @@ char mode_7(int increment)
         sprintf(lcd_string, "%c%2d.%03d", sign, integer_part, floating_part);
 
         HMI.Write(7, lcd_string);
-
 
         return 7;
 }

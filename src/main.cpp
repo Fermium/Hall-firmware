@@ -23,21 +23,32 @@
 //#define apparatus_rdt
 #define apparatus_hall
 
-//pin declarations
-#define _pin_heater 0
-#define _adc_channel_vh      0
-#define _adc_channel_vr      1
-#define _adc_channel_temp    2
-#define _adc_channel_current 3
 
 
+#ifdef apparatus_hall
 
-//initialize PGAs
-PGA113 pga_vh(10);
-PGA113 pga_vr(11);
-PGA113 pga_3(12);
-MCP3304 adc(13);
-HMI_abstraction HMI;
+  //pin definitions
+  #define _adc_channel_vh      0
+  #define _adc_channel_vr      1
+  #define _adc_channel_temp    2
+  #define _adc_channel_current 3
+
+  //initialize pga
+  PGA113 pga_vh(10);
+  PGA113 pga_vr(11);
+  PGA113 pga_3(12);
+
+  //pin hall/rdt
+  #define _pin_heater 0
+
+  //initialize PGAs
+  MCP3304 adc(13);
+
+
+#endif
+
+
+HMI_abstraction HMI; //HMI is a wrapper around the LCD library
 ClickEncoder *encoder;
 
 
@@ -66,6 +77,8 @@ void setup()
 
 //hall: current mode, just update lcd.
 //format: 99.99mA fixed range
+//rdt:
+//format:
 char mode_1(int increment)
 {
         //[needed] brig this values to global
@@ -100,12 +113,15 @@ char mode_1(int increment)
         return 1;
 }
 //hall: nothing selected, nothing to do
+//rdt:
 char mode_2(int increment)
 {
         return 3;
 }
 //hall: resistance selected, just update lcd
-//hall format: 9999.9 fixed range
+//format: 9999.9 fixed range
+//rdt:
+//format:
 char mode_3(int increment)
 {
         //[needed] move to global
@@ -148,6 +164,9 @@ char mode_3(int increment)
         return 3;
 }
 //hall: resistance gain selected, update resistance gain and LCD
+//format: 1 to 200
+//rdt:
+//format:
 char mode_4(int increment)
 {
         static unsigned int index = 0;
@@ -162,7 +181,9 @@ char mode_4(int increment)
         return 4;
 }
 //hall: temperature selected, update LCD
-//format -250 to +250 (celsiuls degrees)
+//format: -250 to +250 (celsiuls degrees)
+//rdt:
+//format:
 char mode_5(int increment)
 {
         float voltage;
@@ -203,6 +224,8 @@ char mode_5(int increment)
 
 //hall: heating element power selected, update it and LCD
 //format 100% or ERR
+//rdt:
+//format:
 char mode_6(int increment)
 {
         float voltage;
@@ -250,6 +273,8 @@ char mode_6(int increment)
 }
 //hall: hall voltage selected, update LCD
 //format: +99.999mV fixed range
+//rdt:
+//format:
 char mode_7(int increment)
 {
         float voltage_reference = 5.0;
@@ -313,6 +338,8 @@ char mode_7(int increment)
 }
 //hall: hall gain selected, update value and LCD
 //format: from 1 to 200
+//rdt:
+//format:
 char mode_8(int increment)
 {
         static unsigned int index = 0;

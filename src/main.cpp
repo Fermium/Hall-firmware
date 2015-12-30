@@ -23,6 +23,9 @@
 //#define apparatus_rdt
 #define apparatus_hall
 
+//pin declarations
+#define _pin_heater 0
+
 
 
 //initialize PGAs
@@ -68,7 +71,7 @@ char mode_1(int increment)
 
 
         //remember IT guys, viva il re' d'italia
-        current = ((( 5.0 * adc.readSgl(0) ) / 4096 ) / shunt_resistor );
+        current = ((( 5.0 * adc.readSgl(0) ) / 8192 ) / shunt_resistor );
 
         char lcd_string[9];
         char sign;
@@ -110,8 +113,8 @@ char mode_3(int increment)
         float resistance;
 
         // [needed] fix adc channels
-        current = ((( 5.0 * adc.readSgl(0) ) / 4096 ) / shunt_resistor );
-        voltage = (( 5.0 * adc.readSgl(1) ) / 4096 );
+        current = ((( 5.0 * adc.readSgl(0) ) / 8192 ) / shunt_resistor );
+        voltage = (( 5.0 * adc.readSgl(1) ) / 8192 );
         voltage /= pga_vr.GetSetGain(); //compensate for PGA gain
         voltage *= fixed_gain_vres;     //compensate for INSTR-AMP gain
         resistance = voltage / current;
@@ -153,7 +156,8 @@ char mode_4(int increment)
 
         return 4;
 }
-//hall: temperature selected, update LCD and check for overheating
+//hall: temperature selected, update LCD
+//format -250 to +250 (celsiuls degrees)
 char mode_5(int increment)
 {
         float voltage;
@@ -164,17 +168,10 @@ char mode_5(int increment)
 
 
         // [needed] fix adc channels
-        voltage = (( 5.0 * adc.readSgl(3) ) / 4096 );
+        voltage = (( 5.0 * adc.readSgl(3) ) / 8192 );
         temperature = (voltage - temperature_zero_volt) /  temperature_voltage_gain;
 
 
-        if ( temperature > temperature_overheat_limit )
-        {
-                // [needed] code print error
-                // [needed] fix pin
-                // [needed] reeeeealy pin that pin to ground with a cycle
-                analogWrite(0, 0);
-        }
 
         char lcd_string[9];
         char sign;
@@ -200,18 +197,22 @@ char mode_5(int increment)
 }
 
 //hall: heating element power selected, update it and LCD
+//format 100% or ERR
 char mode_6(int increment)
 {
         float voltage;
         float temperature_zero_volt = 2.5;
         float temperature_voltage_gain = 0.01; // mV/°C
         int temperature_overheat_limit = 150;
-        static int power_percentage;
+        static unsigned int power_percentage = 0;
         float temperature;
+
+        power_percentage = (power_percentage + increment) % 100;
+
 
         // [needed] fix adc channels
         // [needed] change with precalculated LSBs value
-        voltage = (( 5.0 * adc.readSgl(3) ) / 4096 );
+        voltage = (( 5.0 * adc.readSgl(3) ) / 8192 );
         temperature = (voltage - temperature_zero_volt) /  temperature_voltage_gain;
 
         char lcd_string[9];
@@ -223,13 +224,19 @@ char mode_6(int increment)
                         power_percentage = 100;
                 else if (power_percentage < 0)
                         power_percentage = 0;
-                sprintf(lcd_string, "%d %%", power_percentage);
+                sprintf(lcd_string, "%d%%", power_percentage);
+                analogWrite(_pin_heater, char (power_percentage*2.55));
         }
         else //IT'S ALL BURNING TO FLAMESSSSS MUAHAHAHAH devil !
         {
                 // [needed] code print error
                 // [needed] fix pin
-                analogWrite(0, 0);
+                for(char i=0, i!=50, i++){
+
+                  digitalWrite(_pin_heater, LOW);
+                  analogWrite(_pin_heater, 0);
+        }
+
                 // [needed] reeeeealy pin that pin to ground with a cycle
                 power_percentage = 0;
                 sprintf(lcd_string, "%s", "ERR ");
@@ -239,47 +246,61 @@ char mode_6(int increment)
         return 6;
 }
 //hall: hall voltage selected, update LCD
-//format:
+//format: +99.999mV fixed range
 char mode_7(int increment)
 {
         float voltage_reference = 5.0;
-        float fixed_gain_vhall = 1;
+        float fixed_gain_vhall = 1.0;
+        float hall_zero_voltage = 2.5;
 
         float voltage;
 
-        voltage = (( 5.0 * adc.readSgl(0) ) / 4096 );
-        voltage /= pga_vh.GetSetGain();
-        voltage *= fixed_gain_vhall;
+        voltage = (( 5.0 * adc.readSgl(0) ) / 8192 ); //voltage in the adc input
+        voltage -= hall_zero_voltage; //voltage output relative to 2.5V ground
+        voltage /= pga_vh.GetSetGain(); //compensate for PGA gain
+        voltage *= fixed_gain_vhall;    //compensate for INSTR-AMP gain
 
         char lcd_string[9];
 
-        //for now, during debug, let's use just a fixed mV range 0001-9999mV
-        //something like 123.4mV would be probably better, as well as a 1.234mV
-        //the adc has
-
-        sprintf(lcd_string, "%4d", voltage * 1000);
 
         /*
-           char sign;
+           cerchiamo di capire qualcosa su come fare un range carino perchè
+           questo Vhall è il cazzo di valore più importante di tutto lo strumento
 
-           unsigned int integer_part;
-           unsigned int floating_part;
+           Allora innanzitutto consideriamo che l'adc ha 8192 valori
+           arrotondiamo 9999 insomma 4 cifre
 
-           integer_part = trunc(voltage);
-           floating_part = ((voltage - integer_part)*100);
-           if (voltage > 0)
+           Abbiamo 7 char nell'lcd di spazio, quindi 6 cifre considerando il punto
+           si potrebbe fare +999.99mV, sicuramente copre la tensione massima
+           in quanto alla risoluzione minima se ipotiziamo 1mV all'adc,
+           gain di 200 sarebbe 5uV in entrata quindi 0.005mV
+
+           tuttavia da manuale a 30mA di corrente troviamo una Vhall max di 0.07V
+           ovvero 70mV, arrotondiamo 99V.
+
+           Un range migliore è quindi +99.999mV fixed range
+         */
+
+
+        char sign;
+        float voltage_mV;
+        voltage_mV=voltage*1000;
+
+        unsigned int integer_part;
+        unsigned int floating_part;
+
+        integer_part = trunc(voltage_mV);
+        floating_part = ((voltage_mV - integer_part)*1000);
+        if (voltage_mV > 0)
                 sign = ' ';
-           else
-           {
+        else
+        {
                 integer_part = -integer_part;
                 floating_part = -floating_part;
                 sign = '-';
-           }
+        }
 
-           sprintf(lcd_string, "%c%2d.%02d", sign, integer_part, floating_part);
-
-         */
-
+        sprintf(lcd_string, "%c%2d.%03d", sign, integer_part, floating_part);
 
         HMI.Write(7, lcd_string);
 
@@ -287,6 +308,7 @@ char mode_7(int increment)
         return 7;
 }
 //hall: hall gain selected, update value and LCD
+//format: from 1 to 200
 char mode_8(int increment)
 {
         static unsigned int index = 0;

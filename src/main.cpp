@@ -25,6 +25,10 @@
 
 //pin declarations
 #define _pin_heater 0
+#define _adc_channel_vh      0
+#define _adc_channel_vr      1
+#define _adc_channel_temp    2
+#define _adc_channel_current 3
 
 
 
@@ -71,7 +75,7 @@ char mode_1(int increment)
 
 
         //remember IT guys, viva il re' d'italia
-        current = ((( 5.0 * adc.readSgl(0) ) / 8192 ) / shunt_resistor );
+        current = ((( 5.0 * adc.readSgl(_adc_channel_current) ) / 8192 ) / shunt_resistor );
 
         char lcd_string[9];
         char sign;
@@ -112,9 +116,10 @@ char mode_3(int increment)
         float current;
         float resistance;
 
+
         // [needed] fix adc channels
-        current = ((( 5.0 * adc.readSgl(0) ) / 8192 ) / shunt_resistor );
-        voltage = (( 5.0 * adc.readSgl(1) ) / 8192 );
+        current = ((( 5.0 * adc.readSgl(_adc_channel_current) ) / 8192 ) / shunt_resistor );
+        voltage = (( 5.0 * adc.readSgl(_adc_channel_vr) ) / 8192 );
         voltage /= pga_vr.GetSetGain(); //compensate for PGA gain
         voltage *= fixed_gain_vres;     //compensate for INSTR-AMP gain
         resistance = voltage / current;
@@ -168,7 +173,7 @@ char mode_5(int increment)
 
 
         // [needed] fix adc channels
-        voltage = (( 5.0 * adc.readSgl(3) ) / 8192 );
+        voltage = (( 5.0 * adc.readSgl(_adc_channel_temp) ) / 8192 );
         temperature = (voltage - temperature_zero_volt) /  temperature_voltage_gain;
 
 
@@ -212,7 +217,7 @@ char mode_6(int increment)
 
         // [needed] fix adc channels
         // [needed] change with precalculated LSBs value
-        voltage = (( 5.0 * adc.readSgl(3) ) / 8192 );
+        voltage = (( 5.0 * adc.readSgl(_adc_channel_temp) ) / 8192 );
         temperature = (voltage - temperature_zero_volt) /  temperature_voltage_gain;
 
         char lcd_string[9];
@@ -227,18 +232,15 @@ char mode_6(int increment)
                 sprintf(lcd_string, "%d%%", power_percentage);
                 analogWrite(_pin_heater, char (power_percentage*2.55));
         }
-        else //IT'S ALL BURNING TO FLAMESSSSS MUAHAHAHAH devil !
+        else //IT'S ALL BURNING TO FLAMESSSSS
         {
                 // [needed] code print error
-                // [needed] fix pin
                 for(char i=0; i!=50; i++)
                 {
-
                         digitalWrite(_pin_heater, LOW);
                         analogWrite(_pin_heater, 0);
                 }
 
-                // [needed] reeeeealy pin that pin to ground with a cycle
                 power_percentage = 0;
                 sprintf(lcd_string, "%s", "ERR ");
         }
@@ -256,7 +258,9 @@ char mode_7(int increment)
 
         float voltage;
 
-        voltage = (( 5.0 * adc.readSgl(0) ) / 8192 ); //voltage in the adc input
+
+
+        voltage = (( 5.0 * adc.readSgl(_adc_channel_vh) ) / 8192 ); //voltage in the adc input
         voltage -= hall_zero_voltage; //voltage output relative to 2.5V ground
         voltage /= pga_vh.GetSetGain(); //compensate for PGA gain
         voltage *= fixed_gain_vhall;    //compensate for INSTR-AMP gain

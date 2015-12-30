@@ -255,6 +255,7 @@ char mode_7(int increment)
 
         //for now, during debug, let's use just a fixed mV range 0001-9999mV
         //something like 123.4mV would be probably better, as well as a 1.234mV
+        //the adc has
 
         sprintf(lcd_string, "%4d", voltage * 1000);
 
@@ -312,20 +313,20 @@ void loop()
         if(b != ClickEncoder::Open) //if the button has been pressed
         {
                 switch (b) {
-                case ClickEncoder::Pressed :
-                case ClickEncoder::Clicked :
+                case ClickEncoder::Pressed:
+                case ClickEncoder::Clicked:
                         if (mode > 0 && mode < 8)// 8>mode>0
                                 mode++;
                         else //mode is either 8 and need to rotate to zero or fucked up
                                 mode = 1;
                         break;
-                case ClickEncoder::Held :
+                case ClickEncoder::Held:
                         //nothing to do, really
                         break;
-                case ClickEncoder::Released :
+                case ClickEncoder::Released:
                         //nothing to do, really
                         break;
-                case ClickEncoder::DoubleClicked :
+                case ClickEncoder::DoubleClicked:
                         if (mode > 0 && mode < 7)// 8>mode>=0
                                 mode+=2;
                         else if (mode >= 7 && mode <= 8) //rotate

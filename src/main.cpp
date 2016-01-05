@@ -34,15 +34,15 @@
   #define _adc_channel_current 3
 
   //initialize pga
-  PGA113 pga_vh(10);
-  PGA113 pga_vr(11);
-  PGA113 pga_3(12);
+  PGA113 pga_vh(8); //atmega328 PB0
+  PGA113 pga_vr(7); //atmega328 PD7
+  PGA113 pga_3(9);  //atmega328 PB1
 
   //pin hall/rdt
   #define _pin_heater 0
 
   //initialize PGAs
-  MCP3304 adc(13);
+  MCP3304 adc(A5); //atmega328 PC5
 #endif
 
 HMI_abstraction HMI; //HMI is a wrapper around the LCD library
@@ -63,6 +63,11 @@ void setup()
         //interrupt for the encoder reading and other useful stuff
         Timer1.initialize(1000);
         Timer1.attachInterrupt(timerIsr);
+
+
+        //MPC3304 is already initialized
+        //PGAs are already initialized
+
 
 }
 
@@ -349,6 +354,9 @@ char mode_8(int increment)
 
 void loop()
 {
+        if(false)
+        {
+
         static char mode = 0;
         int16_t encoder_notches = 0;
         static unsigned long int cycles = 0; //cycles of loop since the apparatus has been powered
@@ -432,4 +440,51 @@ void loop()
         }
 
         encoder_notches = 0;
+      }
+
+
+      while(true)
+      {
+
+      delay(2000);
+
+      Serial.begin(9600);
+      Serial.println("1x");
+      pga_3.Set(0, 1);
+
+      delay(2000);
+      Serial.println("2x");
+      pga_3.Set(1, 1);
+
+
+
+/*
+      SPI.begin();
+      Serial.println("gain 1x");
+      //pga_vh.Set(0,1);
+      //pga_vr.Set(0,1);
+      //pga_3.Set(0,1);
+
+      //take the SS pin low to select the chip:
+      digitalWrite(8, LOW);
+      //send in the address and value via SPI:
+      SPI.transfer(0b00101010);         //command "write"
+      SPI.transfer(0b00000001);
+
+      //take the SS pin high to de-select the chip:
+      digitalWrite(8, HIGH);
+
+      delay(5000);
+      //take the SS pin low to select the chip:
+      digitalWrite(8, LOW);
+      //send in the address and value via SPI:
+      SPI.transfer(0b00101010);         //command "write"
+      SPI.transfer(0b00001100);
+
+      //take the SS pin high to de-select the chip:
+      digitalWrite(8, HIGH);
+      */
+
+      }
+
 }

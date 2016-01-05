@@ -55,9 +55,10 @@ class PGA113 {
 public:
 
 //initialize the PGA given the pins
-PGA113(char _pin)
+PGA113(char _p)
 {
-
+        _pin = _p;
+        
         //set pin to output
         pinMode (_pin, OUTPUT);
 
@@ -85,17 +86,18 @@ PGA113(char _pin)
 }
 
 //set the gain in index form
-void Set(char _G, char _Ch)
+void Set(unsigned char _G, unsigned char _Ch)
 {
         //take the SS pin low to select the chip:
         digitalWrite(_pin, LOW);
         //send in the address and value via SPI:
-        SPI.transfer(0x2A);         //command "write"
-        SPI.transfer((_G<<4) + _Ch);
+        SPI.transfer(0b00101010);         //command "write"
+        SPI.transfer((_G << 4) + _Ch);
         //take the SS pin high to de-select the chip:
         digitalWrite(_pin, HIGH);
 
         _gain_set_index = _G;
+        _channel_set = _Ch;
 
 }
 

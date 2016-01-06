@@ -49,6 +49,12 @@ public:
 
         }
 
+
+        void buzzer(int ms)
+        {
+          //codice buzzer in ms
+        }
+
         //custom bootscreen for LCD
         void boot(void)
         {

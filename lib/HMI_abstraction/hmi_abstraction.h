@@ -15,6 +15,9 @@
 #ifndef HMI_abstraction_h
 #define HMI_abstraction_h
 
+#define HMI_DEBUG
+
+
 #include "Arduino.h"
 #include <LiquidCrystal.h>
 
@@ -129,11 +132,27 @@ public:
 
                 }
 
+                #ifndef HMI_DEBUG
                 Update();
+                #endif
         }
 
+        #ifdef HMI_DEBUG
+        void GetLine (unsigned char _line, char* _dest_array)
+        {
+
+          char temp_string[20];
+
+          for(char i=0; i!=21; i++)
+          {
+            temp_string[i] = _LCD_array[i][_line][0];
+          }
+          temp_string[20] = 0;
+        }
+        #endif
+
 private:
-        char _LCD_array[20][4][2];
+        char _LCD_array[21][4][2];
 
 
         // clear X characters starting from a position

@@ -64,6 +64,7 @@ void setup()
         Timer1.initialize(1000);
         Timer1.attachInterrupt(timerIsr);
 
+        HMI.Begin();
 
         //MPC3304 is already initialized
         //PGAs are already initialized
@@ -443,19 +444,24 @@ void loop()
       }
 
 
+
+
       while(true)
       {
 
       delay(2000);
 
       Serial.begin(9600);
-      Serial.println("1x");
-      pga_3.Set(0, 1);
+      //Serial.println("1x");
+      //pga_3.Set(0, 1);
 
-      delay(2000);
-      Serial.println("2x");
-      pga_3.Set(1, 1);
+      //delay(2000);
+      //Serial.println("2x");
+      //pga_3.Set(1, 1);
 
+      char temp_string[21];
+      HMI.GetLine(1, temp_string);
+      Serial.println(temp_string);
 
 
 /*

@@ -27,7 +27,7 @@
 
 #ifdef apparatus_hall
 
-//pin definitions
+//adc channel definitions definitions
   #define _adc_channel_vh      0
   #define _adc_channel_vr      1
   #define _adc_channel_temp    2
@@ -39,7 +39,7 @@ PGA113 pga_vr(7);   //atmega328 PD7
 PGA113 pga_3(9);    //atmega328 PB1
 
 //pin hall/rdt
-  #define _pin_heater 0
+  #define _pin_heater 5
 
 //initialize PGAs
 MCP3304 adc(19);   //atmega328 PC5
@@ -511,7 +511,7 @@ void loop()
 
  */
 
-
+/*
    Serial.print(adc.readSgl(0));
    Serial.print("\t");
    Serial.print(adc.readSgl(1));
@@ -528,7 +528,15 @@ void loop()
    Serial.print("\t");
    Serial.println(adc.readSgl(7));
    delay(100);
- 
+   */
+
+   analogWrite(_pin_heater, 0);
+   delay(4000);
+   analogWrite(_pin_heater, 255);
+   delay(4000);
+   analogWrite(_pin_heater, 124);
+   delay(4000);
+
 
 /*
       SPI.begin();

@@ -34,7 +34,7 @@ class MCP3304
 		int readAdc(int ch, boolean sgl);
 
 		//read Single of ch
-		int readSgl(int ch);
+		int readSgl(unsigned char ch);
 
 		//read Difference of ch
 		int readDiff(int ch);

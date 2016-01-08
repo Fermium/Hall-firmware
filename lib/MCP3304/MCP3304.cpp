@@ -63,13 +63,15 @@ int MCP3304::readAdc(int ch, boolean sgl) {
 								return adcValue;
 }
 
-int MCP3304::readSgl(int ch) {
+int MCP3304::readSgl(unsigned char ch) {
+
+
 
 								ch %= 8; //no more then 8 pins
 
 								SPI.setClockDivider(SPI_CLOCK_DIV16); //Set Clockdivider for 1MHz SPI freq.
 
-								SPI.setBitOrder(MSBFIRST); //set to most significatn bit first
+								//SPI.setBitOrder(MSBFIRST); //set to most significatn bit first
 								SPI.setDataMode(SPI_MODE0); // SPI 0,0 as per MCP330x data sheet
 
 								digitalWrite(_CS, LOW); //activate Chipselect
@@ -85,6 +87,8 @@ int MCP3304::readSgl(int ch) {
 								SPI.setClockDivider(SPI_CLOCK_DIV4); //set back to default
 
 								return adcValue;
+
+
 }
 
 int MCP3304::readDiff(int ch) {

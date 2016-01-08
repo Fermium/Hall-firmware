@@ -27,22 +27,22 @@
 
 #ifdef apparatus_hall
 
-  //pin definitions
+//pin definitions
   #define _adc_channel_vh      0
   #define _adc_channel_vr      1
   #define _adc_channel_temp    2
   #define _adc_channel_current 3
 
-  //initialize pga
-  PGA113 pga_vh(8); //atmega328 PB0
-  PGA113 pga_vr(7); //atmega328 PD7
-  PGA113 pga_3(9);  //atmega328 PB1
+//initialize pga
+PGA113 pga_vh(8);   //atmega328 PB0
+PGA113 pga_vr(7);   //atmega328 PD7
+PGA113 pga_3(9);    //atmega328 PB1
 
-  //pin hall/rdt
+//pin hall/rdt
   #define _pin_heater 0
 
-  //initialize PGAs
-  MCP3304 adc(A5); //atmega328 PC5
+//initialize PGAs
+MCP3304 adc(19);   //atmega328 PC5
 #endif
 
 HMI_abstraction HMI; //HMI is a wrapper around the LCD library
@@ -109,9 +109,12 @@ char mode_1(int increment)
                 sign = '-';
         }
 
-        sprintf(lcd_string, "%c%2d.%02d", sign, integer_part, floating_part);
+        sprintf(lcd_string, "%c%2d.%02d mA", sign, integer_part, floating_part);
 
-        HMI.Write(1, lcd_string);
+
+        HMI.WriteString(0, 0, lcd_string);
+
+
         return 1;
 }
 //hall: nothing selected, nothing to do
@@ -160,7 +163,7 @@ char mode_3(int increment)
         //[needed] check and fix format
         sprintf(lcd_string, "%c%4d.%01d", sign, integer_part, floating_part);
 
-        HMI.Write(3, lcd_string);
+        //HMI.Write(3, lcd_string);
         // [needed] code print float
         return 3;
 }
@@ -177,7 +180,7 @@ char mode_4(int increment)
 
         char lcd_string[9];
         sprintf(lcd_string, "%d", pga_vr.GetSetGain() );
-        HMI.Write(4, lcd_string);
+        //HMI.Write(4, lcd_string);
 
         return 4;
 }
@@ -216,7 +219,7 @@ char mode_5(int increment)
 
         sprintf(lcd_string, "%c%2d.%02d", sign, integer_part, floating_part);
 
-        HMI.Write(5, lcd_string);
+        //HMI.Write(5, lcd_string);
         return 5;
 }
 
@@ -266,7 +269,7 @@ char mode_6(int increment)
                 sprintf(lcd_string, "%s", "ERR ");
         }
 
-        HMI.Write(6, lcd_string);
+        //HMI.Write(6, lcd_string);
         return 6;
 }
 //hall: hall voltage selected, update LCD
@@ -330,7 +333,7 @@ char mode_7(int increment)
 
         sprintf(lcd_string, "%c%2d.%03d", sign, integer_part, floating_part);
 
-        HMI.Write(7, lcd_string);
+        //HMI.Write(7, lcd_string);
 
         return 7;
 }
@@ -348,125 +351,184 @@ char mode_8(int increment)
         char lcd_string[9];
         sprintf(lcd_string, "%d", pga_vh.GetSetGain() );
 
-        HMI.Write(8, lcd_string);
+        //HMI.Write(8, lcd_string);
 
         return 8;
 }
+
+
 
 void loop()
 {
         if(false)
         {
 
-        static char mode = 0;
-        int16_t encoder_notches = 0;
-        static unsigned long int cycles = 0; //cycles of loop since the apparatus has been powered
+                static char mode = 0;
+                int16_t encoder_notches = 0;
+                static unsigned long int cycles = 0; //cycles of loop since the apparatus has been powered
 
-        //parse the button of the encoder user input
-        ClickEncoder::Button b = encoder->getButton(); //b is button status
-        if(b != ClickEncoder::Open) //if the button has been pressed
-        {
-                switch (b) {
-                case ClickEncoder::Pressed:
-                case ClickEncoder::Clicked:
-                        if (mode > 0 && mode < 8)// 8>mode>0
-                                mode++;
-                        else //mode is either 8 and need to rotate to zero or fucked up
-                                mode = 1;
+                //parse the button of the encoder user input
+                ClickEncoder::Button b = encoder->getButton(); //b is button status
+                if(b != ClickEncoder::Open) //if the button has been pressed
+                {
+                        switch (b) {
+                        case ClickEncoder::Pressed:
+                        case ClickEncoder::Clicked:
+                                if (mode > 0 && mode < 8) // 8>mode>0
+                                        mode++;
+                                else //mode is either 8 and need to rotate to zero or fucked up
+                                        mode = 1;
+                                break;
+                        case ClickEncoder::Held:
+                                //nothing to do, really
+                                break;
+                        case ClickEncoder::Released:
+                                //nothing to do, really
+                                break;
+                        case ClickEncoder::DoubleClicked:
+                                if (mode > 0 && mode < 7) // 8>mode>=0
+                                        mode+=2;
+                                else if (mode >= 7 && mode <= 8) //rotate
+                                        mode =2 - (8-mode );
+                                else //fucked up
+                                        mode = 1;
+                                break;
+                        }
+                }
+
+                //number of rotations of the encoder
+                encoder_notches = encoder->getValue();
+
+                //call the mode subroutine, pass the rotation of the encoder
+                switch (mode)
+                {
+                case 1:
+                        mode = mode_1(encoder_notches);
                         break;
-                case ClickEncoder::Held:
-                        //nothing to do, really
+                case 2:
+                        mode = mode_2(encoder_notches);
                         break;
-                case ClickEncoder::Released:
-                        //nothing to do, really
+                case 3:
+                        mode = mode_3(encoder_notches);
                         break;
-                case ClickEncoder::DoubleClicked:
-                        if (mode > 0 && mode < 7)// 8>mode>=0
-                                mode+=2;
-                        else if (mode >= 7 && mode <= 8) //rotate
-                                mode =2 - (8-mode );
-                        else  //fucked up
-                                mode = 1;
+                case 4:
+                        mode = mode_4(encoder_notches);
+                        break;
+                case 5:
+                        mode = mode_5(encoder_notches);
+                        break;
+                case 6:
+                        mode = mode_6(encoder_notches);
+                        break;
+                case 7:
+                        mode = mode_7(encoder_notches);
+                        break;
+                case 8:
+                        mode = mode_8(encoder_notches);
+                        break;
+                default:
+                        mode = 1; //shit happens
                         break;
                 }
+
+                if (   ( (cycles % 1000) == 0 )  &&  ( encoder_notches == 0 ) )
+                {
+                        //every now and then just update the display
+                        //if no user interaction has occurred
+                        mode_1(0);
+                        mode_2(0);
+                        mode_3(0);
+                        mode_4(0);
+                        mode_5(0);
+                        mode_6(0);
+                        mode_7(0);
+                        mode_8(0);
+                }
+
+                encoder_notches = 0;
         }
 
-        //number of rotations of the encoder
-        encoder_notches = encoder->getValue();
 
-        //call the mode subroutine, pass the rotation of the encoder
-        switch (mode)
+        Serial.begin(9600);
+
+
+
+
+
+        while(true)
         {
-        case 1:
-                mode = mode_1(encoder_notches);
-                break;
-        case 2:
-                mode = mode_2(encoder_notches);
-                break;
-        case 3:
-                mode = mode_3(encoder_notches);
-                break;
-        case 4:
-                mode = mode_4(encoder_notches);
-                break;
-        case 5:
-                mode = mode_5(encoder_notches);
-                break;
-        case 6:
-                mode = mode_6(encoder_notches);
-                break;
-        case 7:
-                mode = mode_7(encoder_notches);
-                break;
-        case 8:
-                mode = mode_8(encoder_notches);
-                break;
-        default:
-                mode = 1; //shit happens
-                break;
-        }
 
-        if (   ( (cycles % 1000) == 0 )  &&  ( encoder_notches == 0 ) )
-        {
-                //every now and then just update the display
-                //if no user interaction has occurred
-                mode_1(0);
-                mode_2(0);
-                mode_3(0);
-                mode_4(0);
-                mode_5(0);
-                mode_6(0);
-                mode_7(0);
-                mode_8(0);
-        }
-
-        encoder_notches = 0;
-      }
+                //delay(2000);
 
 
+                //Serial.println("1x");
+                //pga_3.Set(0, 1);
+
+                //delay(2000);
+                //Serial.println("2x");
+                //pga_3.Set(1, 1);
+
+                //char temp_string[21];
+                //Serial.println("mode 1 start");
+                //mode_1(0);
+                //Serial.println("mode 1 end");
+
+                //HMI.WriteString(0, 0, "12345678901234567890");
+                //HMI.WriteString(0, 1, "22345678901234567890");
+                //HMI.WriteString(0, 2, "32345678901234567890");
+                //HMI.WriteString(0, 3, "42345678901234567890");
+                /*
+                   Serial.println("\n\ndi seguito 4 linee");
+                   HMI.GetLine(0, temp_string, 1);
+                   Serial.println(temp_string);
+                   HMI.GetLine(1, temp_string, 1);
+                   Serial.println(temp_string);
+                   HMI.GetLine(2, temp_string, 1);
+                   Serial.println(temp_string);
+                   HMI.GetLine(3, temp_string, 1);
+                   Serial.println(temp_string);
+
+                 */
+
+/*
+   Serial.print("\n\n");
+   for (int i=0; i!= 8; i++)
+   {
+   int raw = adc.readSgl(i);
+
+   float voltage;
+   voltage = ((float)raw  / 4096.0 * 5.0); //voltage in the adc input
+   Serial.print("adc channel");
+   Serial.print(i);
+   Serial.print("  reading: ");
+   Serial.print(raw);
+   Serial.print("  voltage: ");
+   Serial.println(voltage);
+
+   }
+
+   Serial.print("\n\n");
+
+ */
 
 
-      while(true)
-      {
-
-      delay(2000);
-
-      Serial.begin(9600);
-      //Serial.println("1x");
-      //pga_3.Set(0, 1);
-
-      //delay(2000);
-      //Serial.println("2x");
-      //pga_3.Set(1, 1);
-
-      char temp_string[21];
-
-      HMI.WriteString(0, 1, "12345678901234567890");
-
-
-      HMI.GetLine(1, temp_string);
-      Serial.println(temp_string);
-
+   Serial.print(adc.readSgl(0));
+   Serial.print("\t");
+   Serial.print(adc.readSgl(1));
+   Serial.print("\t");
+   Serial.print(adc.readSgl(2));
+   Serial.print("\t");
+   Serial.print(adc.readSgl(3));
+   Serial.print("\t");
+   Serial.print(adc.readSgl(4));
+   Serial.print("\t");
+   Serial.print(adc.readSgl(5));
+   Serial.print("\t");
+   Serial.print(adc.readSgl(6));
+   Serial.print("\t");
+   Serial.println(adc.readSgl(7));
+   delay(100);
+ 
 
 /*
       SPI.begin();
@@ -493,8 +555,8 @@ void loop()
 
       //take the SS pin high to de-select the chip:
       digitalWrite(8, HIGH);
-      */
+ */
 
-      }
+        }
 
 }

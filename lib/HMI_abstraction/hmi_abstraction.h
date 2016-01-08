@@ -17,6 +17,10 @@
 
 #define HMI_DEBUG
 
+#define LCD_LENGHT 21
+#define LCD_HEIGHT  4
+
+
 
 #include "Arduino.h"
 #include <LiquidCrystal.h>
@@ -30,10 +34,15 @@ public:
 
         void Begin (void)
         {
-                memset(_LCD_array, 0, (sizeof(_LCD_array)/sizeof(_LCD_array[0]))); //clear the array
+                //memset(_LCD_array, 0, (sizeof(_LCD_array)/sizeof(_LCD_array[0]))); //clear the array
+                char emptystring[21] = "                    ";
+                WriteString(0,0, emptystring);
+                WriteString(0,1, emptystring);
+                WriteString(0,2, emptystring);
+                WriteString(0,3, emptystring);
 
                 //lcd init code
-                _lcd_unabstracted.begin(20, 4);
+                _lcd_unabstracted.begin(LCD_LENGHT, LCD_HEIGHT);
                 _lcd_unabstracted.setCursor(0, 0);
                 _lcd_unabstracted.noCursor();
 
@@ -76,19 +85,21 @@ public:
         void WriteString(char column, char row, char *src)
         {
                 char lenght = strlen(src);
-                for (char i=0; i != lenght; i++)
+                for (char i=0; ( i != lenght && i != LCD_LENGHT) ; i++)
                 {
                         _LCD_array[column+i][row][1] = src[i];
                 }
 
+
         }
 
+        /*
         //write a string to a custom position on the LCD
         void Write (char position, char* src)
         {
                 char srctemp[10];
-                strncpy(srctemp, src, strlen(src));
 
+                strncpy(srctemp, src, strlen(src));
                 switch (position) {
                 case 1:
                         ClearPos(0,0,8);
@@ -114,7 +125,7 @@ public:
                         break;
                 case 6:
                         ClearPos(11,2,8);
-                        WriteString(18,2,"P      %%");
+                        WriteString(11,2,"P      %");
                         WriteString(15,2,srctemp);
                         break;
                 case 7:
@@ -136,41 +147,44 @@ public:
                 Update();
                 #endif
         }
+        */
 
         #ifdef HMI_DEBUG
-        void GetLine (unsigned char _line, char* _dest_array)
+        void GetLine (unsigned char _line, char* _dest_array, bool _third_parameter)
         {
 
-          for(char i=0; i!=21; i++)
+
+          for(char i=0; i!=LCD_LENGHT; i++)
           {
-            _dest_array[i] = _LCD_array[i][_line][1];
+            _dest_array[i] = _LCD_array[i][_line][_third_parameter];
           }
+          _dest_array[21] = 0;
         }
 
-         
+
         #endif
 
 
 
 private:
-        char _LCD_array[21][4][2];
+        char _LCD_array[LCD_LENGHT][LCD_HEIGHT][2]; //[][][0] is written, [][][1] to be written
 
 
         // clear X characters starting from a position
         void ClearPos (char startcolumn, char startrow, char lenght)
         {
-                for (int i=0; i!= lenght; i++)
+                for (int i=0; (i!= lenght && i != (LCD_LENGHT - startcolumn )) ; i++)
                 {
-                        _LCD_array[startcolumn+i][startrow][1] = 0;
+                        _LCD_array[startcolumn+i][startrow][1] = ' ';
                 }
         }
-
+public:
         //update from MCU memory to LCD
         void Update (void)
         {
-                for (char column=0; column != 20; column++)
+                for (char column=0; column != LCD_LENGHT; column++)
                 {
-                        for (char row=0; row!=4; row++)
+                        for (char row=0; row!=LCD_HEIGHT; row++)
                         {
                                 if(_LCD_array[column][row][1] != _LCD_array[column][row][0] )                 //if new value if different from old
                                 {

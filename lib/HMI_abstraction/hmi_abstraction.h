@@ -141,15 +141,16 @@ public:
         void GetLine (unsigned char _line, char* _dest_array)
         {
 
-          char temp_string[20];
-
           for(char i=0; i!=21; i++)
           {
-            temp_string[i] = _LCD_array[i][_line][0];
+            _dest_array[i] = _LCD_array[i][_line][1];
           }
-          temp_string[20] = 0;
         }
+
+         
         #endif
+
+
 
 private:
         char _LCD_array[21][4][2];

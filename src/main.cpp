@@ -460,6 +460,10 @@ void loop()
       //pga_3.Set(1, 1);
 
       char temp_string[21];
+
+      HMI.WriteString(0, 1, "12345678901234567890");
+
+
       HMI.GetLine(1, temp_string);
       Serial.println(temp_string);
 

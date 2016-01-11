@@ -490,6 +490,13 @@ void loop()
 
                  */
 
+
+Serial.println(adc.readSgl(0));
+delay(50);
+
+
+
+
 /*
    Serial.print("\n\n");
    for (int i=0; i!= 8; i++)
@@ -530,12 +537,15 @@ void loop()
    delay(100);
    */
 
+   /*
    analogWrite(_pin_heater, 0);
    delay(4000);
    analogWrite(_pin_heater, 255);
    delay(4000);
    analogWrite(_pin_heater, 124);
    delay(4000);
+   */
+
 
 
 /*

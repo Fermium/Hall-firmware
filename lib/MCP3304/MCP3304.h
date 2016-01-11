@@ -30,17 +30,17 @@ class MCP3304
 		//constructor
 		MCP3304(int CS);
 
-		//read SGL or DIFF of ch
-		int readAdc(int ch, boolean sgl);
+		//read SGL or DIFF of PIN
+		int readAdc(int pin, boolean sgl);
 
-		//read Single of ch
-		int readSgl(unsigned char ch);
+		//read Single of Pin
+		int readSgl(int pin);
 
-		//read Difference of ch
-		int readDiff(int ch);
+		//read Difference of Pin
+		int readDiff(int pin);
 
-		// Return SS chnumber
-		int getCSch();
+		// Return SS Pinnumber
+		int getCSPin();
 
 	private:
 

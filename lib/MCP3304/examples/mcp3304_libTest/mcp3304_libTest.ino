@@ -1,8 +1,8 @@
 /*
   Examples Sketch for MCP3304.h
-
+  
   This example reads the voltage on CH0 and CH1 of an MCP3304 13bit ADC
-
+  
   The circuit:
   * CH0 and CH1 to a potentiometer
   * DGND and AGND to Ground
@@ -11,32 +11,32 @@
   * DIN - to digital pin 11 (MOSI pin)
   * DOUT - to digital pin 12 (MISO pin)
   * CLK - to digital pin 13 (SCK pin)
-
+  
   Thanks to all in this forum post http://forum.arduino.cc/index.php?topic=216121.15
   who inspired me.
-
+  
   created 8 Feb 2014
   by Stefan Wallnoefer
   for other librarys and sketches look at
-  https://github.com/walle86/
+  https://github.com/walle86/ 
 */
-
+  
 #include <MCP3304.h>
 #include <SPI.h>
 
-MCP3304 adc1(10);  //creat an instance with ch 10 as CS
+MCP3304 adc1(10);  //creat an instance with pin 10 as CS
 
 int reading;
 float voltage;
 
 void setup(){
-
+  
   Serial.begin(9600);
-
+    
 }
 
 void loop(){
-
+  
   reading = adc1.readAdc(0,1);    //read data from CH0 in SGL mode
   voltage = reading / 4095.0 * 5.0;    //convert reading into a voltage from 0 to 5V
   Serial.print("voltage CH0= ");
@@ -57,8 +57,9 @@ void loop(){
   Serial.print("differenz CH1-CH0= ");
   Serial.print(voltage, 3);
   Serial.println("V");
-
+  
   Serial.println(" ");
-
+  
   delay(1000);    //delay for 1s so you dont get to much lines in the serial monitor
 }
+  

@@ -50,23 +50,23 @@ PGA113 pga_3(9);    //atmega328 PB1
 
 
 HMI_abstraction HMI; //HMI is a wrapper around the LCD library
-//ClickEncoder *encoder;
+ClickEncoder *encoder;
 
 //periodic subroutine called every 1ms
 void timerIsr() {
-        //encoder->service(); //execute encoder stuff
+        encoder->service(); //execute encoder stuff
 
 }
 
 
 void setup()
 {
-        //encoder = new ClickEncoder(A1, A0, A2); //not really a fan of new...
-        //encoder->setAccelerationEnabled(true); //enable cool acceleration feeling
+        encoder = new ClickEncoder(A1, A0, A2); //not really a fan of new...
+        encoder->setAccelerationEnabled(true); //enable cool acceleration feeling
 
         //interrupt for the encoder reading and other useful stuff
-        //Timer1.initialize(1000);
-        //iTimer1.attachInterrupt(timerIsr);
+        Timer1.initialize(1000);
+        Timer1.attachInterrupt(timerIsr);
 
         HMI.Begin();
 
@@ -350,7 +350,7 @@ void loop()
 {
 
         if(false)
-        {/*
+        {
 
                 static char mode = 0;
                 int16_t encoder_notches = 0;
@@ -390,6 +390,7 @@ void loop()
                 encoder_notches = encoder->getValue();
 
                 //call the mode subroutine, pass the rotation of the encoder
+                /*
                 switch (mode)
                 {
                 case 1:
@@ -420,11 +421,13 @@ void loop()
                         mode = 1; //shit happens
                         break;
                 }
-
+                */
                 if (   ( (cycles % 1000) == 0 )  &&  ( encoder_notches == 0 ) )
                 {
                         //every now and then just update the display
                         //if no user interaction has occurred
+
+                        /*
                         mode_1(0);
                         mode_2(0);
                         mode_3(0);
@@ -433,10 +436,11 @@ void loop()
                         mode_6(0);
                         mode_7(0);
                         mode_8(0);
+                        */
                 }
 
                 encoder_notches = 0;
-                */
+
         }
 
 

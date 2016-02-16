@@ -453,7 +453,7 @@ void loop()
 
         while(true)
         {
-          Serial.println(adc.readSgl(7));
+          Serial.println(adc.readSgl(1));
           delay(100);
         }
 

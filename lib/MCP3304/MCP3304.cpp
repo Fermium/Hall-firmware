@@ -32,9 +32,6 @@ void MCP3304::init (void)
 
 	//set pin modes
  pinMode(ADC_CS, OUTPUT);
- pinMode(ADC_MOSI, OUTPUT);
- pinMode(ADC_MISO, INPUT);
- pinMode(SPI_CLK, OUTPUT);
  digitalWrite(SPI_CLK,HIGH); //clock
  digitalWrite(ADC_MISO, LOW); //output -- supposed to be float but not sure how to do this on Arduino
  digitalWrite(ADC_MOSI, HIGH); //input
@@ -46,7 +43,6 @@ void MCP3304::init (void)
 }
 
 MCP3304::MCP3304(int CS) {
-//ADC_CS = CS;
 init();
 }
 

@@ -34,12 +34,12 @@
 //initialize PGAs
 MCP3304 adc(19);   //atmega328 PC5
 
-/*
+
 //initialize pga
 PGA113 pga_vh(8);   //atmega328 PB0
 PGA113 pga_vr(7);   //atmega328 PD7
 PGA113 pga_3(9);    //atmega328 PB1
-*/
+
 
 
 //pin hall/rdt
@@ -448,7 +448,7 @@ void loop()
 
         while(true)
         {
-          Serial.println(adc.readSgl(1));
+          Serial.println(adc.readSgl(7));
           delay(100);
         }
 

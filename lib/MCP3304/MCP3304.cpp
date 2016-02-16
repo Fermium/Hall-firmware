@@ -19,7 +19,6 @@
 	for other librarys and sketches look at https://github.com/walle86/
 */
 
-#include <SPI.h>
 #include <MCP3304.h>
 #include <Arduino.h>
 
@@ -30,7 +29,6 @@
 
 void MCP3304::init (void)
 {
-	SPI.end();
 
 	//set pin modes
  pinMode(ADC_CS, OUTPUT);
@@ -58,7 +56,7 @@ void MCP3304::pulse(void)
   digitalWrite(SPI_CLK, HIGH); delayMicroseconds(50);
 }
 
-int MCP3304::readSgl(int channel) {	
+int MCP3304::readSgl(int channel) {
 	init();
 
 	int value=0;

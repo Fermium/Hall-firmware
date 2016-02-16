@@ -38,17 +38,17 @@
 
  */
 
-/*
-   USAGE
-   PGA pga(cs1, cs2, cs3);
+ #define PGA_MOSI 11
+ #define PGA_CLK 13
 
- */
 
 #ifndef Pga_h
 #define Pga_h
 
 #include "Arduino.h"
-#include <SPI.h>
+
+//this implementation use a software spi
+//shiftOut(dataPin, clockPin, bitOrder, value)
 
 class PGA113 {
 
@@ -88,19 +88,20 @@ PGA113(char _p)
 //set the gain in index form
 void Set(unsigned char _G, unsigned char _Ch)
 {
-        SPI.begin();
         //take the SS pin low to select the chip:
         digitalWrite(_pin, LOW);
         //send in the address and value via SPI:
-        SPI.transfer(0b00101010);         //command "write"
-        SPI.transfer((_G << 4) + _Ch);
+        //SPI.transfer(0b00101010);         //command "write"
+        //SPI.transfer((_G << 4) + _Ch);
+        shiftOut(PGA_MOSI, PGA_CLK, MSBFIRST, 0b00101010) ;
+        shiftOut(PGA_MOSI, PGA_CLK, MSBFIRST, ((_G << 4) + _Ch)) ;
+
         //take the SS pin high to de-select the chip:
         digitalWrite(_pin, HIGH);
 
         _gain_set_index = _G;
         _channel_set = _Ch;
 
-        SPI.end();
 
 }
 

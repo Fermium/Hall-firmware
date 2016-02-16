@@ -31,7 +31,7 @@ void MCP3304::pulse(void)
   digitalWrite(SPI_CLK, HIGH); delayMicroseconds(50);
 }
 
-int MCP3304::readSgl(int channel) {
+int MCP3304::read(int channel) {
 	init();
 
 	int value=0;

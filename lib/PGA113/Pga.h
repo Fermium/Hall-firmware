@@ -102,7 +102,6 @@ void Set(unsigned char _G, unsigned char _Ch)
         _gain_set_index = _G;
         _channel_set = _Ch;
 
-
 }
 
 //return the actual set  gain in numerical format

@@ -99,7 +99,7 @@ char mode_1(int increment)
 
 
         //remember IT guys, viva il re' d'italia
-        current = ((( 5.0 * adc.readSgl(_adc_channel_current) ) / 8192 ) / shunt_resistor );
+        current = ((( 5.0 * adc.read(_adc_channel_current) ) / 8192 ) / shunt_resistor );
 
         char lcd_string[9];
         char sign;
@@ -147,8 +147,8 @@ char mode_3(int increment)
         float resistance;
 
         // [needed] fix adc channels
-        current = ((( 5.0 * adc.readSgl(_adc_channel_current) ) / 8192 ) / shunt_resistor );
-        voltage = (( 5.0 * adc.readSgl(_adc_channel_vr) ) / 8192 );
+        current = ((( 5.0 * adc.read(_adc_channel_current) ) / 8192 ) / shunt_resistor );
+        voltage = (( 5.0 * adc.read(_adc_channel_vr) ) / 8192 );
         voltage /= pga_vr.GetSetGain(); //compensate for PGA gain
         voltage *= fixed_gain_vres;     //compensate for INSTR-AMP gain
         resistance = voltage / current;
@@ -206,7 +206,7 @@ char mode_5(int increment)
         float temperature;
 
         // [needed] fix adc channels
-        voltage = (( 5.0 * adc.readSgl(_adc_channel_temp) ) / 8192 );
+        voltage = (( 5.0 * adc.read(_adc_channel_temp) ) / 8192 );
         temperature = (voltage - temperature_zero_volt) /  temperature_voltage_gain;
 
         char lcd_string[9];
@@ -250,7 +250,7 @@ char mode_6(int increment)
 
         // [needed] fix adc channels
         // [needed] change with precalculated LSBs value
-        voltage = (( 5.0 * adc.readSgl(_adc_channel_temp) ) / 8192 );
+        voltage = (( 5.0 * adc.read(_adc_channel_temp) ) / 8192 );
         temperature = (voltage - temperature_zero_volt) /  temperature_voltage_gain;
 
         char lcd_string[9];
@@ -297,7 +297,7 @@ char mode_7(int increment)
 
 
 
-        voltage = (( 5.0 * adc.readSgl(_adc_channel_vh) ) / 8192 ); //voltage in the adc input
+        voltage = (( 5.0 * adc.read(_adc_channel_vh) ) / 8192 ); //voltage in the adc input
         voltage -= hall_zero_voltage; //voltage output relative to 2.5V ground
         voltage /= pga_vh.GetSetGain(); //compensate for PGA gain
         voltage *= fixed_gain_vhall;    //compensate for INSTR-AMP gain
@@ -453,7 +453,7 @@ void loop()
 
         while(true)
         {
-          Serial.println(adc.readSgl(1));
+          Serial.println(adc.read(1));
           delay(100);
         }
 

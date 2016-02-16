@@ -70,6 +70,11 @@ void setup()
 
         HMI.Begin();
 
+        //software SPI
+        pinMode(11, OUTPUT); //MOSI
+        pinMode(12, INPUT);  //MISO
+        pinMode(13, OUTPUT); //CLK
+
 
         //MPC3304 is already initialized
         //PGAs are already initialized

@@ -38,12 +38,12 @@
 
  */
 
- #define PGA_MOSI 11
- #define PGA_CLK 13
-
 
 #ifndef Pga_h
 #define Pga_h
+
+#define PGA_MOSI 11
+#define PGA_CLK 13
 
 #include "Arduino.h"
 

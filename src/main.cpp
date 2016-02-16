@@ -23,8 +23,6 @@
 //#define apparatus_rdt
 #define apparatus_hall
 
-
-
 #ifdef apparatus_hall
 
 //adc channel definitions definitions
@@ -33,45 +31,51 @@
   #define _adc_channel_temp    2
   #define _adc_channel_current 3
 
+//initialize PGAs
+MCP3304 adc(19);   //atmega328 PC5
+
+/*
 //initialize pga
 PGA113 pga_vh(8);   //atmega328 PB0
 PGA113 pga_vr(7);   //atmega328 PD7
 PGA113 pga_3(9);    //atmega328 PB1
+*/
+
 
 //pin hall/rdt
-  #define _pin_heater 5
+#define _pin_heater 5
 
-//initialize PGAs
-MCP3304 adc(19);   //atmega328 PC5
+
 #endif
 
+
 HMI_abstraction HMI; //HMI is a wrapper around the LCD library
-ClickEncoder *encoder;
+//ClickEncoder *encoder;
 
 //periodic subroutine called every 1ms
 void timerIsr() {
-        encoder->service(); //execute encoder stuff
+        //encoder->service(); //execute encoder stuff
 
 }
 
 
 void setup()
 {
-        encoder = new ClickEncoder(A1, A0, A2); //not really a fan of new...
-        encoder->setAccelerationEnabled(true); //enable cool acceleration feeling
+        //encoder = new ClickEncoder(A1, A0, A2); //not really a fan of new...
+        //encoder->setAccelerationEnabled(true); //enable cool acceleration feeling
 
         //interrupt for the encoder reading and other useful stuff
-        Timer1.initialize(1000);
-        Timer1.attachInterrupt(timerIsr);
+        //Timer1.initialize(1000);
+        //iTimer1.attachInterrupt(timerIsr);
 
         HMI.Begin();
 
+
         //MPC3304 is already initialized
         //PGAs are already initialized
-
-
 }
 
+/*
 
 //MODES
 //each mode return the next mode. it usually is itself, but can be
@@ -276,6 +280,8 @@ char mode_6(int increment)
 //format: +99.999mV fixed range
 //rdt:
 //format:
+
+
 char mode_7(int increment)
 {
         float voltage_reference = 5.0;
@@ -292,25 +298,6 @@ char mode_7(int increment)
         voltage *= fixed_gain_vhall;    //compensate for INSTR-AMP gain
 
         char lcd_string[9];
-
-
-        /*
-           cerchiamo di capire qualcosa su come fare un range carino perchè
-           questo Vhall è il cazzo di valore più importante di tutto lo strumento
-
-           Allora innanzitutto consideriamo che l'adc ha 8192 valori
-           arrotondiamo 9999 insomma 4 cifre
-
-           Abbiamo 7 char nell'lcd di spazio, quindi 6 cifre considerando il punto
-           si potrebbe fare +999.99mV, sicuramente copre la tensione massima
-           in quanto alla risoluzione minima se ipotiziamo 1mV all'adc,
-           gain di 200 sarebbe 5uV in entrata quindi 0.005mV
-
-           tuttavia da manuale a 30mA di corrente troviamo una Vhall max di 0.07V
-           ovvero 70mV, arrotondiamo 99mV.
-
-           Un range migliore è quindi +99.999mV fixed range
-         */
 
 
         char sign;
@@ -357,17 +344,20 @@ char mode_8(int increment)
 }
 
 
+*/
 
 void loop()
 {
+
         if(false)
-        {
+        {/*
 
                 static char mode = 0;
                 int16_t encoder_notches = 0;
                 static unsigned long int cycles = 0; //cycles of loop since the apparatus has been powered
 
                 //parse the button of the encoder user input
+
                 ClickEncoder::Button b = encoder->getButton(); //b is button status
                 if(b != ClickEncoder::Open) //if the button has been pressed
                 {
@@ -446,135 +436,16 @@ void loop()
                 }
 
                 encoder_notches = 0;
+                */
         }
 
 
         Serial.begin(9600);
 
-
-
-
-
         while(true)
         {
-
-                //delay(2000);
-
-
-                //Serial.println("1x");
-                //pga_3.Set(0, 1);
-
-                //delay(2000);
-                //Serial.println("2x");
-                //pga_3.Set(1, 1);
-
-                //char temp_string[21];
-                //Serial.println("mode 1 start");
-                //mode_1(0);
-                //Serial.println("mode 1 end");
-
-                //HMI.WriteString(0, 0, "12345678901234567890");
-                //HMI.WriteString(0, 1, "22345678901234567890");
-                //HMI.WriteString(0, 2, "32345678901234567890");
-                //HMI.WriteString(0, 3, "42345678901234567890");
-                /*
-                   Serial.println("\n\ndi seguito 4 linee");
-                   HMI.GetLine(0, temp_string, 1);
-                   Serial.println(temp_string);
-                   HMI.GetLine(1, temp_string, 1);
-                   Serial.println(temp_string);
-                   HMI.GetLine(2, temp_string, 1);
-                   Serial.println(temp_string);
-                   HMI.GetLine(3, temp_string, 1);
-                   Serial.println(temp_string);
-
-                 */
-
-
-Serial.println(adc.readSgl(0));
-delay(50);
-
-
-
-
-/*
-   Serial.print("\n\n");
-   for (int i=0; i!= 8; i++)
-   {
-   int raw = adc.readSgl(i);
-
-   float voltage;
-   voltage = ((float)raw  / 4096.0 * 5.0); //voltage in the adc input
-   Serial.print("adc channel");
-   Serial.print(i);
-   Serial.print("  reading: ");
-   Serial.print(raw);
-   Serial.print("  voltage: ");
-   Serial.println(voltage);
-
-   }
-
-   Serial.print("\n\n");
-
- */
-
-/*
-   Serial.print(adc.readSgl(0));
-   Serial.print("\t");
-   Serial.print(adc.readSgl(1));
-   Serial.print("\t");
-   Serial.print(adc.readSgl(2));
-   Serial.print("\t");
-   Serial.print(adc.readSgl(3));
-   Serial.print("\t");
-   Serial.print(adc.readSgl(4));
-   Serial.print("\t");
-   Serial.print(adc.readSgl(5));
-   Serial.print("\t");
-   Serial.print(adc.readSgl(6));
-   Serial.print("\t");
-   Serial.println(adc.readSgl(7));
-   delay(100);
-   */
-
-   /*
-   analogWrite(_pin_heater, 0);
-   delay(4000);
-   analogWrite(_pin_heater, 255);
-   delay(4000);
-   analogWrite(_pin_heater, 124);
-   delay(4000);
-   */
-
-
-
-/*
-      SPI.begin();
-      Serial.println("gain 1x");
-      //pga_vh.Set(0,1);
-      //pga_vr.Set(0,1);
-      //pga_3.Set(0,1);
-
-      //take the SS pin low to select the chip:
-      digitalWrite(8, LOW);
-      //send in the address and value via SPI:
-      SPI.transfer(0b00101010);         //command "write"
-      SPI.transfer(0b00000001);
-
-      //take the SS pin high to de-select the chip:
-      digitalWrite(8, HIGH);
-
-      delay(5000);
-      //take the SS pin low to select the chip:
-      digitalWrite(8, LOW);
-      //send in the address and value via SPI:
-      SPI.transfer(0b00101010);         //command "write"
-      SPI.transfer(0b00001100);
-
-      //take the SS pin high to de-select the chip:
-      digitalWrite(8, HIGH);
- */
-
+          Serial.println(adc.readSgl(1));
+          delay(100);
         }
 
 }

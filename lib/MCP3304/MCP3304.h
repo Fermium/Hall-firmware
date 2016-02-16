@@ -30,20 +30,20 @@ class MCP3304
 		//constructor
 		MCP3304(int CS);
 
-		//read SGL or DIFF of PIN
-		int readAdc(int pin, boolean sgl);
-
 		//read Single of Pin
 		int readSgl(int pin);
-
-		//read Difference of Pin
-		int readDiff(int pin);
 
 		// Return SS Pinnumber
 		int getCSPin();
 
+		//pulse clock
+		void pulse();
+
+		//initialize spi and IC
+		void init();
+
 	private:
 
-		int _CS;
+		int ADC_CS;
 };
 #endif

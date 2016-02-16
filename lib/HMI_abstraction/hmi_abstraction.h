@@ -26,7 +26,7 @@
 #include <LiquidCrystal.h>
 
 //LiquidCrystal(rs, enable, d4, d5, d6, d7)
-LiquidCrystal _lcd_unabstracted(1, 2, 3, 4, 5, 6); //cambiare numeri pin
+LiquidCrystal _lcd_unabstracted(2, 2, 2, 2, 2, 2); //cambiare numeri pin
 
 
 class HMI_abstraction {

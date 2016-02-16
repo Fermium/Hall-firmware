@@ -58,7 +58,7 @@ public:
 PGA113(char _p)
 {
         _pin = _p;
-        
+
         //set pin to output
         pinMode (_pin, OUTPUT);
 
@@ -66,7 +66,7 @@ PGA113(char _p)
         digitalWrite(_pin, HIGH);
 
         //initialize SPI library
-        SPI.begin();         //to be called
+        //SPI.begin();         //to be called
 
         //initialize PGAs with gain=1 and channel=0
         Set(0,0);
@@ -88,6 +88,7 @@ PGA113(char _p)
 //set the gain in index form
 void Set(unsigned char _G, unsigned char _Ch)
 {
+        SPI.begin();
         //take the SS pin low to select the chip:
         digitalWrite(_pin, LOW);
         //send in the address and value via SPI:
@@ -98,6 +99,8 @@ void Set(unsigned char _G, unsigned char _Ch)
 
         _gain_set_index = _G;
         _channel_set = _Ch;
+
+        SPI.end();
 
 }
 

@@ -23,98 +23,91 @@
 #include <MCP3304.h>
 #include <Arduino.h>
 
+#define ADC_MOSI 11   // ADC_MOSI
+#define ADC_MISO 12    // ADC_MISO
+#define SPI_CLK 13  // Clock
+#define ADC_CS 19
+
+void MCP3304::init (void)
+{
+	SPI.end();
+
+	//set pin modes
+ pinMode(ADC_CS, OUTPUT);
+ pinMode(ADC_MOSI, OUTPUT);
+ pinMode(ADC_MISO, INPUT);
+ pinMode(SPI_CLK, OUTPUT);
+ digitalWrite(SPI_CLK,HIGH); //clock
+ digitalWrite(ADC_MISO, LOW); //output -- supposed to be float but not sure how to do this on Arduino
+ digitalWrite(ADC_MOSI, HIGH); //input
+ digitalWrite(ADC_CS, HIGH);
+ delayMicroseconds(50);
+ digitalWrite(ADC_CS, LOW);
+ delayMicroseconds(50);
+ digitalWrite(ADC_CS, HIGH);
+}
+
 MCP3304::MCP3304(int CS) {
-	_CS = CS;
-	pinMode(_CS, OUTPUT);
-	digitalWrite(_CS, HIGH);	//deactivate Chipselect
-	SPI.begin();
+//ADC_CS = CS;
+init();
 }
 
-int MCP3304::readAdc(int pin, boolean sgl) {
-
-	pin %= 8; //no more then 8 pins
-
-	SPI.setClockDivider(SPI_CLOCK_DIV16);	//Set Clockdivider for 1MHz SPI freq.
-
-	SPI.setBitOrder(MSBFIRST);		//set to most significatn bit first
-  SPI.setDataMode(SPI_MODE0);    // SPI 0,0 as per MCP330x data sheet
-
-  byte configBits;
-
-  sgl ? configBits=0x0C : configBits=0x08;	// 1100 for SGL mode, 1000 for DIFF mode
-
-  digitalWrite(_CS, LOW);	//activate Chipselect
-
-  SPI.transfer(configBits | (pin >> 1));	//4bits 0, startbit, SGL/DIFF, 2 Channelbits (D2, D1)
-  byte hi = SPI.transfer(pin << 7);				//lowest Channelbit (D0), rest dont care;return= first 2 returnbits undef, nullbit, Signbit, 4 highest databits
-  byte lo = SPI.transfer(0x00);						//send dont care;return= 8 lowest databits
-
-  digitalWrite(_CS, HIGH);		//deactivate Chipselect
-
-	byte sign = hi & 0x10;		//extract Sign Bit for DIFF
-  int adcValue = ((hi & 0x0f) << 8) + lo;		//combinig the 2 return Values
-
-  if(sign){
-    adcValue -= 4096;		//if CH- > CH+
-  }
-
-  SPI.setClockDivider(SPI_CLOCK_DIV4);	//set back to default SPI speed
-
-  return adcValue;
+void MCP3304::pulse(void)
+{
+  digitalWrite(SPI_CLK, LOW); delayMicroseconds(50);
+  digitalWrite(SPI_CLK, HIGH); delayMicroseconds(50);
 }
 
-int MCP3304::readSgl(int pin) {
+int MCP3304::readSgl(int channel) {	
+	init();
 
-	pin %= 8; //no more then 8 pins
+	int value=0;
+	digitalWrite(ADC_CS, HIGH);
+	delayMicroseconds(50);
+	digitalWrite(ADC_CS, LOW);
+	delayMicroseconds(50);
+	digitalWrite(ADC_MOSI, HIGH); //start pulse
+	pulse();
+	digitalWrite(ADC_MOSI, HIGH); //single mode
+	pulse();
+	for(int x=2; x>=0; --x)
+	{
+		if(bitRead(channel,x))
+		{
+			digitalWrite(ADC_MOSI, HIGH);
+		}
+		else
+		{
+			digitalWrite(ADC_MOSI, LOW);
+		}
+		pulse();
+	}
+	digitalWrite(ADC_MOSI, LOW);//put low throughout
+	for(int x=1;x<=3;++x)
+	{
+		//blank, Null, and sign bit (always 0 in single mode)
+		pulse();
+	}
+	//now get twelve bits
+	for(int x=11; x>=0; --x)
+	{
+			pulse();
+			if (digitalRead(ADC_MISO))
+			{
+				 bitSet(value,x);
+			}
+			else
+			{
+				 bitClear(value,x);
+			}
+	}
+	digitalWrite(ADC_CS, HIGH);
+	delayMicroseconds(10);
+	return value;
 
-	SPI.setClockDivider(SPI_CLOCK_DIV16);	//Set Clockdivider for 1MHz SPI freq.
 
-	SPI.setBitOrder(MSBFIRST);		//set to most significatn bit first
-  SPI.setDataMode(SPI_MODE0);    // SPI 0,0 as per MCP330x data sheet
-
-  digitalWrite(_CS, LOW);	//activate Chipselect
-
-  SPI.transfer(0x0C | (pin >> 1));	//4bits 0, startbit, SGL = 1, 2 Channelbits (D2, D1)
-  byte hi = SPI.transfer(pin << 7);	//lowest Channelbit (D0), rest dont care; return= first 2 returnbits undef, nullbit, Signbit, 4 highest databits
-  byte lo = SPI.transfer(0x00);			//send dont care; return= 8 lowest databits
-
-  digitalWrite(_CS, HIGH); //deactivate Chipselect
-
-  int adcValue = ((hi & 0x0f) << 8) + lo; //combinig the 2 return Values
-
-  SPI.setClockDivider(SPI_CLOCK_DIV4);	//set back to default
-
-  return adcValue;
 }
 
-int MCP3304::readDiff(int pin) {
-
-	pin %= 8; //no more then 8 pins
-
-	SPI.setClockDivider(SPI_CLOCK_DIV16);	//Set Clockdivider for 1MHz SPI freq.
-
-	SPI.setBitOrder(MSBFIRST);		//set to most significatn bit first
-  SPI.setDataMode(SPI_MODE0);    // SPI 0,0 as per MCP330x data sheet
-
-  digitalWrite(_CS, LOW); //activate Chipselect
-
-  SPI.transfer(0x08 | (pin >> 1));		//4bits 0, startbit, DIFF = 0, 2 Channelbits (D2, D1)
-  byte hi = SPI.transfer(pin << 7);		//lowest Channelbit (D0), rest dont care; return= first 2 returnbits undef, nullbit, Signbit, 4 highest databits
-  byte lo = SPI.transfer(0x00);				//send dont care; return= 8 lowest databits
-
-  digitalWrite(_CS, HIGH);		//deactivate Chipselect
-
-	byte sign = hi & 0x10;			//extract Sign Bit for DIFF
-  int adcValue = ((hi & 0x0f) << 8) + lo;			//combinig the 2 return Values
-
-  if(sign){
-    adcValue -= 4096;			//if CH- > CH+
-  }
-
-  SPI.setClockDivider(SPI_CLOCK_DIV4);	//set back to default
-
-  return adcValue;
-}
 int MCP3304::getCSPin() {
-	return _CS;
+	return ADC_CS;
 }

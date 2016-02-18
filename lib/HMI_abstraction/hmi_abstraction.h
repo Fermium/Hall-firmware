@@ -11,16 +11,13 @@
 //-123.3 °c||P   100%
 //12.34   V||Vh G=200
 
-
 #ifndef HMI_abstraction_h
 #define HMI_abstraction_h
 
-#define HMI_DEBUG
+#define HMI_DEBUG //build debug functions
 
 #define LCD_LENGHT 21
 #define LCD_HEIGHT  4
-
-
 
 #include "Arduino.h"
 #include <LiquidCrystal.h>
@@ -35,7 +32,7 @@ public:
         void Begin (void)
         {
                 //memset(_LCD_array, 0, (sizeof(_LCD_array)/sizeof(_LCD_array[0]))); //clear the array
-                char emptystring[21] = "                    ";
+                const char emptystring[21] = "                    ";
                 WriteString(0,0, emptystring);
                 WriteString(0,1, emptystring);
                 WriteString(0,2, emptystring);
@@ -47,7 +44,7 @@ public:
                 _lcd_unabstracted.noCursor();
 
                 //create a custom char for omega
-                byte _char_omega[8] = {
+                const byte CHAR_OMEGA[8] = {
                         0b00000,
                         0b01110,
                         0b10001,
@@ -57,14 +54,14 @@ public:
                         0b00000,
                         0b00000
                 };
-                _lcd_unabstracted.createChar(0, _char_omega);
+                _lcd_unabstracted.createChar(0, CHAR_OMEGA);
 
         }
 
 
         void buzzer(int ms)
         {
-          //codice buzzer in ms
+          //buzz for ms milliseconds
         }
 
         //custom bootscreen for LCD
@@ -92,62 +89,6 @@ public:
 
 
         }
-
-        /*
-        //write a string to a custom position on the LCD
-        void Write (char position, char* src)
-        {
-                char srctemp[10];
-
-                strncpy(srctemp, src, strlen(src));
-                switch (position) {
-                case 1:
-                        ClearPos(0,0,8);
-                        WriteString(0,0,srctemp);
-                        WriteString(6,0,"mA");
-                        break;
-                case 2:
-                        break;
-                case 3:
-                        ClearPos(0,1,8);
-                        WriteString(0,1,srctemp);
-                        _LCD_array[6][1][1] = 0; // simbolo omega
-                        break;
-                case 4:
-                        ClearPos(11,1,8);
-                        WriteString(16,1,srctemp);
-                        WriteString(18,1,"Vr G=");
-                        break;
-                case 5:
-                        ClearPos(0,2,8);
-                        WriteString(0,2,srctemp);
-                        WriteString(7,2,"°c");
-                        break;
-                case 6:
-                        ClearPos(11,2,8);
-                        WriteString(11,2,"P      %");
-                        WriteString(15,2,srctemp);
-                        break;
-                case 7:
-                        ClearPos(0,0,8);
-                        WriteString(0,3,srctemp);
-                        WriteString(7,3,"V");
-                        break;
-                case 8:
-                        ClearPos(11,3,8);
-                        WriteString(16,3,srctemp);
-                        WriteString(18,3,"Vh G=");
-                        break;
-                default:
-                        break;
-
-                }
-
-                #ifndef HMI_DEBUG
-                Update();
-                #endif
-        }
-        */
 
         #ifdef HMI_DEBUG
         void GetLine (unsigned char _line, char* _dest_array, bool _third_parameter)

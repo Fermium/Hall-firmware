@@ -110,6 +110,12 @@ char GetSetGain(void)
         return _gains_available[_gain_set_index];
 }
 
+//return the actual index
+char GetSetIndex(void)
+{
+        return _gain_set_index;
+}
+
 //return the gain in numerical format
 char GetGain(char _i)
 {
@@ -124,7 +130,7 @@ char GetChannel(void)
 
 private:
 unsigned char _gains_available[8];
-unsigned char _gain_set_index; //index from the array above
+unsigned char _gain_set_index; //index of the array above
 unsigned char _channel_set;
 unsigned char _pin;
 

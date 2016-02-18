@@ -7,13 +7,14 @@
 
 
 //please use the tag  [needed] for code that need to be fixed
-
 // [needed] move encoder inside hmi
 
-//12.34  mA||
-//1234.45 O||Vr G=200
-//-123.3 °c||P   100%
-//12.34  mV||Vh G=200
+
+/* DISPLAY FORMAT
+12.34  mA||
+1234.45 O||Vr G=200
+-123.3 °c||P   100%
+12.34  mV||Vh G=200 */
 
 //1 current     - 2 none
 //3 resistance  - 4 resistance gain
@@ -49,6 +50,7 @@ float CAL_VOLTAGE_REFERENCE            = 5.0;  //adc voltage reference
 float CAL_FIXED_GAIN_VRES              = 1.0;  //gain opamp sulla Vref
 float CAL_FIXED_GAIN_VHALL             = 1.0;  //gain opamp sulla Vhall
 float CAL_HALL_ZERO_VOLTAGE            = 2.5;
+char  SAMPLE_TYPE[5]                   = {'G', 'e', ' ', 'P', '\0'};
 
 //pin hall/rdt
 #define _pin_heater 5
@@ -63,9 +65,7 @@ ClickEncoder *encoder;
 //periodic subroutine called every 1ms
 void timerIsr() {
         encoder->service(); //execute encoder stuff
-
 }
-
 
 void setup()
 {
@@ -83,16 +83,19 @@ void setup()
         pinMode(12, INPUT);  //MISO
         pinMode(13, OUTPUT); //CLK
 
-
+        delay(100);
+        hmi.SplashScreen();
+        delay(2500);
         //MPC3304 is already initialized
         //PGAs are already initialized
 }
 
 
-
-//MODES
-//each mode return the next mode. it usually is itself, but can be
-//another one to jump in the menu
+/* MODES
+each mode return the next mode. it usually is itself, but can be
+another one to jump in the menu
+Every mode receive in input the number of "notches" from the encoder
+*/
 
 //hall: current mode, just update lcd.
 //format: 99.99mA fixed range
@@ -167,7 +170,7 @@ char mode_3(int increment)
 
         //[needed] check and fix format
         char lcd_string[9];
-        sprintf(lcd_string, "%c%4d.%01d", sign, integer_part, floating_part);
+        sprintf(lcd_string, "%c%4d.%01d%c", sign, integer_part, floating_part, 0); //0 is the OMEGA char
 
         //hmi.Write(3, lcd_string);
         // [needed] code print float

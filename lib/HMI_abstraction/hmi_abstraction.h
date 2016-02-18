@@ -59,13 +59,13 @@ public:
         }
 
 
-        void buzzer(int ms)
+        void Buzzer(int ms)
         {
           //buzz for ms milliseconds
         }
 
         //custom bootscreen for LCD
-        void boot(void)
+        void SplashScreen(void)
         {
                 //the boot bypass our interface
                 _lcd_unabstracted.setCursor(0, 0);

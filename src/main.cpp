@@ -25,6 +25,11 @@
 #define APPARATUS_HALL
 #define MAIN_DEBUG true
 
+
+//Screen position define for easier usage
+#define CENTER_LEFT 9
+#define CENTER_RIGHT 10
+
 #ifdef APPARATUS_HALL
 
 //adc channel definitions definitions
@@ -78,7 +83,21 @@ void timerIsr() {
         }
 
 }
-
+void init_screen(){
+  unsigned char i=0;
+  for(i;i<4;i++){
+    hmi.WriteString(CENTER_LEFT,i,"||");
+  }
+  mode_1(0);
+  mode_2(0);
+  mode_3(0);
+  mode_4(0);
+  mode_5(0);
+  mode_6(0);
+  mode_7(0);
+  mode_0(0);
+  hmi.Update();
+}
 //int main(void)
 void setup ()
 {
@@ -107,7 +126,7 @@ void setup ()
 
         encoder = new ClickEncoder(4, 3, 14); //not really a fan of new...
         encoder->setAccelerationEnabled(true); //enable cool acceleration feeling
-
+        init_screen();
 
 
 }

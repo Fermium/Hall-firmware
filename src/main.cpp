@@ -269,8 +269,10 @@ char mode_5(int increment)
 char mode_6(int increment)
 {
         static unsigned int power_percentage = 0;
-
+        if ((power_percentage - increment) >= 0 )
         power_percentage = (power_percentage + increment) % 100;
+        else
+        power_percentage = 0;
 
         float temperature;
         float voltage;
@@ -285,7 +287,7 @@ char mode_6(int increment)
         }
         else
         {
-          sprintf(lcd_string, "%7d %%", power_percentage);
+          sprintf(lcd_string, "%6d %%", power_percentage);
         }
 
         char power_255 = power_percentage * 2.55;

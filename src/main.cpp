@@ -84,7 +84,7 @@ void timerIsr() {
 
 }
 
-void init_screen();
+void setup_screen();
 
 //int main(void)
 void setup ()
@@ -114,7 +114,7 @@ void setup ()
 
         encoder = new ClickEncoder(4, 3, 14); //not really a fan of new...
         encoder->setAccelerationEnabled(true); //enable cool acceleration feeling
-        init_screen();
+        setup_screen();
 
 
 }
@@ -399,7 +399,7 @@ void loop()
 
                 //number of rotations of the encoder
                 encoder_notches = encoder->getValue();
-
+                setup_screen(mode);
                 //call the mode subroutine, pass the rotation of the encoder
                 switch (mode)
                 {
@@ -469,18 +469,37 @@ void loop()
         }
 }
 
-void init_screen(){
+void setup_screen(int selection){
   unsigned char i=0;
   for(i;i<4;i++){
     hmi.WriteString(CENTER_LEFT,i,"||");
   }
-  mode_1(0);
-  mode_2(0);
-  mode_3(0);
-  mode_4(0);
-  mode_5(0);
-  mode_6(0);
-  mode_7(0);
-  mode_8(0);
+  switch (selection) {
+    case 0:
+      mode_1(0);
+      mode_2(0);
+      mode_3(0);
+      mode_4(0);
+      mode_5(0);
+      mode_6(0);
+      mode_7(0);
+      mode_8(0);
+      break;
+    case 1:
+    case 3:
+    case 5:
+    case 7:
+      hmi.WriteString(CENTER_LEFT,selection%2,"0b11110111");
+      break;
+    case 2:
+    case 4:
+    case 6:
+    case 8:
+      hmi.WriteString(CENTER_RIGHT,selection%2,"0b11100111");
+      break;
+    default:
+      break;
+  }
+
   hmi.Update();
 }

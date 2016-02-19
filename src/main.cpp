@@ -23,7 +23,7 @@
 
 //#define APPARATUS_RDT
 #define APPARATUS_HALL
-#define MAIN_DEBUG true
+#define MAIN_DEBUG false
 
 
 //Screen position define for easier usage
@@ -49,13 +49,13 @@ PGA113 pga_vr(7);   //atmega328 PD7
 //calibration values:
 float CAL_TEMPERATURE_ZERO_VOLT        = 2.5;
 float CAL_TEMPERATURE_VOLTAGE_GAIN     = 0.01; // mV/°C
-int CAL_TEMPERATURE_OVERHEAT_LIMIT   = 150;    // °C
+int   CAL_TEMPERATURE_OVERHEAT_LIMIT   = 150;    // °C
 float CAL_SHUNT_RESISTOR               = 100.0;
 float CAL_VOLTAGE_REFERENCE            = 5.0;  //adc voltage reference
 float CAL_FIXED_GAIN_VRES              = 1.0;  //gain opamp sulla Vref
 float CAL_FIXED_GAIN_VHALL             = 1.0;  //gain opamp sulla Vhall
 float CAL_HALL_ZERO_VOLTAGE            = 2.5;
-char SAMPLE_TYPE[5]                   = {'G', 'e', ' ', 'P', '\0'};
+char SAMPLE_TYPE[5]                    = {'G', 'e', ' ', 'P', '\0'};
 
 //pin hall/rdt
 #define _pin_heater 5
@@ -79,12 +79,12 @@ void timerIsr() {
 
         if ((milliseconds % 500) == 0)
         {
-          hmi.Update();
+                hmi.Update();
         }
 
 }
 
-void setup_screen();
+void setup_screen(int);
 
 //int main(void)
 void setup ()
@@ -114,7 +114,7 @@ void setup ()
 
         encoder = new ClickEncoder(4, 3, 14); //not really a fan of new...
         encoder->setAccelerationEnabled(true); //enable cool acceleration feeling
-        setup_screen();
+        setup_screen(0); //reset vertical slashes
 
 
 }
@@ -375,10 +375,7 @@ void loop()
                         switch (b) {
                         case ClickEncoder::Pressed:
                         case ClickEncoder::Clicked:
-                                if (mode > 0 && mode < 8) // 8>mode>0
-                                        mode++;
-                                else //mode is either 8 and need to rotate to zero or fucked up
-                                        mode = 1;
+                                mode++;
                                 break;
                         case ClickEncoder::Held:
                                 //nothing to do, really
@@ -387,14 +384,11 @@ void loop()
                                 //nothing to do, really
                                 break;
                         case ClickEncoder::DoubleClicked:
-                                if (mode > 0 && mode < 7) // 8>mode>=0
-                                        mode+=2;
-                                else if (mode >= 7 && mode <= 8) //rotate
-                                        mode =2 - (8-mode );
-                                else //fucked up
-                                        mode = 1;
+                                mode += 2;
                                 break;
                         }
+
+                        mode = mode % 9; //%9 because modes number starts from zero
                 }
 
                 //number of rotations of the encoder
@@ -428,7 +422,7 @@ void loop()
                         mode = mode_8(encoder_notches);
                         break;
                 default:
-                        mode = 1; //shit happens
+                        mode = 0; //Just initialize screen and wait
                         break;
                 }
 
@@ -470,36 +464,77 @@ void loop()
 }
 
 void setup_screen(int selection){
-  unsigned char i=0;
-  for(i;i<4;i++){
-    hmi.WriteString(CENTER_LEFT,i,"||");
-  }
-  switch (selection) {
-    case 0:
-      mode_1(0);
-      mode_2(0);
-      mode_3(0);
-      mode_4(0);
-      mode_5(0);
-      mode_6(0);
-      mode_7(0);
-      mode_8(0);
-      break;
-    case 1:
-    case 3:
-    case 5:
-    case 7:
-      hmi.WriteString(CENTER_LEFT,selection%2,"0b11110111");
-      break;
-    case 2:
-    case 4:
-    case 6:
-    case 8:
-      hmi.WriteString(CENTER_RIGHT,selection%2,"0b11100111");
-      break;
-    default:
-      break;
-  }
+        unsigned char i=0;
+        for(i; i<4; i++) {
+                hmi.WriteString(CENTER_LEFT,i,"||");
+        }
 
-  hmi.Update();
+        char temp[2];
+        /*switch (selection) {
+           case 0:
+                mode_1(0);
+                mode_2(0);
+                mode_3(0);
+                mode_4(0);
+                mode_5(0);
+                mode_6(0);
+                mode_7(0);
+                mode_8(0);
+                break;
+           case 1:
+                selection = 0;
+                break;
+           case 3:
+                selection = 1;
+                break;
+           case 5:
+                selection = 2;
+                break;
+           case 7:
+                selection = 3;
+                sprintf(temp, "%c", 0b01111111);
+                hmi.WriteString(CENTER_LEFT, selection,temp);
+                break;
+           case 2:
+                selection = 0;
+                break;
+           case 4:
+                selection = 1;
+                break;
+           case 6:
+                selection = 2;
+                break;
+           case 8:
+                selection = 3;
+                sprintf(temp, "%c", 0b01111110);
+                hmi.WriteString(CENTER_RIGHT, selection,temp);
+                break;
+           default:
+                break;
+           }*/
+        if(selection==0) {
+                mode_1(0);
+                mode_2(0);
+                mode_3(0);
+                mode_4(0);
+                mode_5(0);
+                mode_6(0);
+                mode_7(0);
+                mode_8(0);
+        }
+        else{
+                if(selection%2!=0) {
+                        sprintf(temp, "%c", 0b01111111);
+                        hmi.WriteString(CENTER_LEFT, selection/2,temp);
+                }
+                else{
+                        sprintf(temp, "%c", 0b01111110);
+                        hmi.WriteString(CENTER_RIGHT, (selection-1)/2,temp);
+                }
+        }
+
+
+
+
+        hmi.Update();
 }

@@ -103,11 +103,8 @@ void timerIsr() {
 
         if ((milliseconds % 500) == 0)
         {
-                hmi.Update();
                 overtemp();
         }
-
-
 
 }
 
@@ -183,13 +180,13 @@ char mode_1(int increment)
         hmi.WriteString(0, 0, lcd_string);
 
 
-        return 1;
+        return 3;
 }
 //hall: nothing selected, nothing to do (maybe debug message? or some other kind of message? should think)
 //rdt:
 char mode_2(int increment)
 {
-
+        hmi.WriteString(11, 0, "         ");
         return 3; //goto next mode
 }
 //hall: resistance selected, just update lcd
@@ -306,7 +303,7 @@ char mode_6(int increment)
         }
         else
         {
-          sprintf(lcd_string, "%d%%", power_percentage);
+          sprintf(lcd_string, "%7d %%", power_percentage);
         }
 
         char power_255 = power_percentage * 2.55;

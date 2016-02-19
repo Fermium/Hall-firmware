@@ -105,7 +105,7 @@ void Set(unsigned char _G, unsigned char _Ch)
 }
 
 //return the actual set  gain in numerical format
-char GetSetGain(void)
+unsigned char GetSetGain(void)
 {
         return _gains_available[_gain_set_index];
 }

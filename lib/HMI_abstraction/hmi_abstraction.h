@@ -27,14 +27,14 @@ LiquidCrystal _lcd_unabstracted(2, A2, A3, 1, A4, 0);
 //PD2, PC2, PC3, PD1, PC4, PD0
 
 /*
-Arduino Ax pins as digital
-Pin 14 = Analog in 0
-Pin 15 = Analog in 1
-Pin 16 = Analog in 2
-Pin 17 = Analog in 3
-Pin 18 = Analog in 4
-Pin 19 = Analog in 5
-*/
+   Arduino Ax pins as digital
+   Pin 14 = Analog in 0
+   Pin 15 = Analog in 1
+   Pin 16 = Analog in 2
+   Pin 17 = Analog in 3
+   Pin 18 = Analog in 4
+   Pin 19 = Analog in 5
+ */
 
 class HMI_abstraction {
 public:
@@ -66,13 +66,31 @@ public:
                 };
                 _lcd_unabstracted.createChar(0, CHAR_OMEGA);
 
+                pinMode(A1, OUTPUT);
+                digitalWrite(A1, LOW);
+
         }
 
 
-        void Buzzer(int ms)
+        void Buzzer(bool on)
         {
-          //buzz for ms milliseconds
+                if(on)
+                        tone(A1, 1254);
+                else
+                        noTone(A1);
+
         }
+
+
+        void Buzzer(bool on, int frequency)
+        {
+                if(on)
+                        tone(A1, frequency);
+                else
+                        noTone(A1);
+
+        }
+
 
         //custom bootscreen for LCD
         void SplashScreen(char* sample_type)
@@ -96,7 +114,7 @@ public:
         void WriteString(char column, char row, char *src)
         {
                 char lenght = strlen(src);
-                for (char i=0; ( i != lenght && i != LCD_LENGHT) ; i++)
+                for (char i=0; ( i != lenght && i != LCD_LENGHT); i++)
                 {
                         _LCD_array[column+i][row][1] = src[i];
                 }
@@ -109,11 +127,11 @@ public:
         {
 
 
-          for(char i=0; i!=LCD_LENGHT; i++)
-          {
-            _dest_array[i] = _LCD_array[i][_line][_third_parameter];
-          }
-          _dest_array[21] = 0;
+                for(char i=0; i!=LCD_LENGHT; i++)
+                {
+                        _dest_array[i] = _LCD_array[i][_line][_third_parameter];
+                }
+                _dest_array[21] = 0;
         }
 
 
@@ -128,7 +146,7 @@ private:
         // clear X characters starting from a position
         void ClearPos (char startcolumn, char startrow, char lenght)
         {
-                for (int i=0; (i!= lenght && i != (LCD_LENGHT - startcolumn )) ; i++)
+                for (int i=0; (i!= lenght && i != (LCD_LENGHT - startcolumn )); i++)
                 {
                         _LCD_array[startcolumn+i][startrow][1] = ' ';
                 }

@@ -11,10 +11,10 @@
 
 
 /* DISPLAY FORMAT
-12.34  mA||
-1234.45 O||Vr G=200
--123.3 °c||P   100%
-12.34  mV||Vh G=200 */
+   12.34  mA||
+   1234.45 O||Vr G=200
+   -123.3 °c||P   100%
+   12.34  mV||Vh G=200 */
 
 //1 current     - 2 none
 //3 resistance  - 4 resistance gain
@@ -44,13 +44,13 @@ PGA113 pga_3(9);    //atmega328 PB1
 //calibration values:
 float CAL_TEMPERATURE_ZERO_VOLT        = 2.5;
 float CAL_TEMPERATURE_VOLTAGE_GAIN     = 0.01; // mV/°C
-int   CAL_TEMPERATURE_OVERHEAT_LIMIT   = 150;  // °C
+int CAL_TEMPERATURE_OVERHEAT_LIMIT   = 150;    // °C
 float CAL_SHUNT_RESISTOR               = 100.0;
 float CAL_VOLTAGE_REFERENCE            = 5.0;  //adc voltage reference
 float CAL_FIXED_GAIN_VRES              = 1.0;  //gain opamp sulla Vref
 float CAL_FIXED_GAIN_VHALL             = 1.0;  //gain opamp sulla Vhall
 float CAL_HALL_ZERO_VOLTAGE            = 2.5;
-char  SAMPLE_TYPE[5]                   = {'G', 'e', ' ', 'P', '\0'};
+char SAMPLE_TYPE[5]                   = {'G', 'e', ' ', 'P', '\0'};
 
 //pin hall/rdt
 #define _pin_heater 5
@@ -73,7 +73,7 @@ void timerIsr() {
         {
           hmi.Update();
         }
-*/
+ */
 }
 
 //int main(void)
@@ -98,21 +98,21 @@ void setup ()
         //    loop();
         //  return 1;
 
-       encoder = new ClickEncoder(4, 3, 14); //not really a fan of new...
-       encoder->setAccelerationEnabled(true); //enable cool acceleration feeling
+        encoder = new ClickEncoder(4, 3, 14); //not really a fan of new...
+        encoder->setAccelerationEnabled(true); //enable cool acceleration feeling
 
-       //interrupt for the encoder reading and other useful stuff
-       Timer1.initialize(1000);
-       Timer1.attachInterrupt(timerIsr);
+        //interrupt for the encoder reading and other useful stuff
+        Timer1.initialize(1000);
+        Timer1.attachInterrupt(timerIsr);
 
 }
 
 
 /* MODES
-each mode return the next mode. it usually is itself, but can be
-another one to jump in the menu
-Every mode receive in input the number of "notches" from the encoder
-*/
+   each mode return the next mode. it usually is itself, but can be
+   another one to jump in the menu
+   Every mode receive in input the number of "notches" from the encoder
+ */
 
 //hall: current mode, just update lcd.
 //format: 99.99mA fixed range
@@ -351,7 +351,7 @@ char mode_8(int increment)
 void loop()
 {
 
-        if(! MAIN_DEBUG) //debugging stuff...
+        if(!MAIN_DEBUG)  //debugging stuff...
         {
                 static char mode = 0;
                 int16_t encoder_notches = 0;
@@ -443,20 +443,21 @@ void loop()
 
         if( MAIN_DEBUG )
         {
+                //DEBUG START
+                //Serial.begin(9600);
 
-        //DEBUG START
-
-        //Serial.begin(9600);
-
-        hmi.WriteString(0,0,"aaa");
-        hmi.Update();
+                hmi.WriteString(0,0,"aaa");
+                hmi.Update();
 
 
-        while(true)
-        {
-          //Serial.println(adc.read(7));
-          delay(100);
+                while(true)
+                {
+                        hmi.Buzzer(true);
+                        delay(1000);
+                        hmi.Buzzer(false);
+                        delay(1000);
+
+                }
+
         }
-
-      }
 }

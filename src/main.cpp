@@ -146,7 +146,6 @@ char mode_1(int increment)
 
         char lcd_string[9];
         sprintf(lcd_string, "%c%2d.%02d mA", sign, integer_part, floating_part);
-
         hmi.WriteString(0, 0, lcd_string);
 
 
@@ -430,7 +429,6 @@ void loop()
                 {
                         //every now and then just update the display
                         //if no user interaction has occurred
-
                         mode_1(0);
                         mode_2(0);
                         mode_3(0);
@@ -439,6 +437,7 @@ void loop()
                         mode_6(0);
                         mode_7(0);
                         mode_8(0);
+                        hmi.Update();
 
                 }
 

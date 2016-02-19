@@ -342,7 +342,7 @@ char mode_7(int increment)
         }
 
         char lcd_string[9];
-        sprintf(lcd_string, "%c%2d.%03d mV", sign, integer_part, floating_part);
+        sprintf(lcd_string, "%c%2d.%01d mV", sign, integer_part, floating_part);
 
         hmi.WriteString(0,3, lcd_string);
 
@@ -478,48 +478,7 @@ void setup_screen(int selection){
         }
 
         char temp[2];
-        /*switch (selection) {
-           case 0:
-                mode_1(0);
-                mode_2(0);
-                mode_3(0);
-                mode_4(0);
-                mode_5(0);
-                mode_6(0);
-                mode_7(0);
-                mode_8(0);
-                break;
-           case 1:
-                selection = 0;
-                break;
-           case 3:
-                selection = 1;
-                break;
-           case 5:
-                selection = 2;
-                break;
-           case 7:
-                selection = 3;
-                sprintf(temp, "%c", 0b01111111);
-                hmi.WriteString(CENTER_LEFT, selection,temp);
-                break;
-           case 2:
-                selection = 0;
-                break;
-           case 4:
-                selection = 1;
-                break;
-           case 6:
-                selection = 2;
-                break;
-           case 8:
-                selection = 3;
-                sprintf(temp, "%c", 0b01111110);
-                hmi.WriteString(CENTER_RIGHT, selection,temp);
-                break;
-           default:
-                break;
-           }*/
+
         if(selection==0) {
                 mode_1(0);
                 mode_2(0);
@@ -540,9 +499,6 @@ void setup_screen(int selection){
                         hmi.WriteString(CENTER_RIGHT, (selection-1)/2,temp);
                 }
         }
-
-
-
 
         hmi.Update();
 }

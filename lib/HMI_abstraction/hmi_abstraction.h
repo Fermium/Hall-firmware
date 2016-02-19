@@ -75,7 +75,7 @@ public:
         }
 
         //custom bootscreen for LCD
-        void SplashScreen(void)
+        void SplashScreen(char* sample_type)
         {
 
                 //the boot bypass our interface
@@ -86,7 +86,7 @@ public:
                 _lcd_unabstracted.setCursor(0, 2);
                 _lcd_unabstracted.print(F("web: fermiumlabs.com"));
                 _lcd_unabstracted.setCursor(0, 3);
-                _lcd_unabstracted.print(F("Sample:   Ge P-doped"));
+                _lcd_unabstracted.print(F(strcat(strcat("Sample:   ",sample_type),"-doped")));
 
 
         }

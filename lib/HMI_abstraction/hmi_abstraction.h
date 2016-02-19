@@ -23,7 +23,7 @@
 #include <LiquidCrystal.h>
 
 //LiquidCrystal(rs, enable, d4, d5, d6, d7)
-LiquidCrystal _lcd_unabstracted(2, 16, 17, 1, 18, 8); //cambiare numeri pin
+LiquidCrystal _lcd_unabstracted(2, A2, A3, 1, A4, 0);
 //PD2, PC2, PC3, PD1, PC4, PD0
 
 /*
@@ -77,6 +77,7 @@ public:
         //custom bootscreen for LCD
         void SplashScreen(void)
         {
+
                 //the boot bypass our interface
                 _lcd_unabstracted.setCursor(0, 0);
                 _lcd_unabstracted.print(F("    Hall  Effect    "));
@@ -86,6 +87,8 @@ public:
                 _lcd_unabstracted.print(F("web: fermiumlabs.com"));
                 _lcd_unabstracted.setCursor(0, 3);
                 _lcd_unabstracted.print(F("Sample:   Ge P-doped"));
+
+
         }
 
         //writes a string to the LCD array

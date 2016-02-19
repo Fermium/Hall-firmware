@@ -4,7 +4,7 @@
 #include <ClickEncoder.h>
 #include <math.h>
 #include <TimerOne.h>         // [needed] change with something that is not CC-BY
-
+#include <LiquidCrystal.h>
 
 //please use the tag  [needed] for code that need to be fixed
 // [needed] move encoder inside hmi
@@ -67,9 +67,10 @@ void timerIsr() {
         encoder->service(); //execute encoder stuff
 }
 
-void setup()
+//int main(void)
+void setup ()
 {
-        encoder = new ClickEncoder(A1, A0, A2); //not really a fan of new...
+        encoder = new ClickEncoder(4, 3, 14); //not really a fan of new...
         encoder->setAccelerationEnabled(true); //enable cool acceleration feeling
 
         //interrupt for the encoder reading and other useful stuff
@@ -88,6 +89,12 @@ void setup()
         delay(2500);
         //MPC3304 is already initialized
         //PGAs are already initialized
+
+        //call the main loop
+        //while(true)
+      //    loop();
+      //  return 1;
+
 }
 
 
@@ -424,15 +431,17 @@ void loop()
 
         }
 
-        #ifdef MAIN_DEBUG //DEBUG START
+        if( MAIN_DEBUG )
+        {
+          
+        //DEBUG START
 
-        Serial.begin(9600);
-
+        //Serial.begin(9600);
         while(true)
         {
-          Serial.println(adc.read(1));
+          //Serial.println(adc.read(7));
           delay(100);
         }
 
-        #endif //DEBUG END
+      }
 }

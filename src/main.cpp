@@ -44,7 +44,7 @@ MCP3304 adc(19);   //atmega328 PC5
 //initialize pga
 PGA113 pga_vh(8);   //atmega328 PB0
 PGA113 pga_vr(7);   //atmega328 PD7
-PGA113 pga_3(9);    //atmega328 PB1
+//PGA113 pga_3(9);    //atmega328 PB1
 
 //calibration values:
 float CAL_TEMPERATURE_ZERO_VOLT        = 2.5;

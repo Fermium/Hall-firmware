@@ -165,18 +165,9 @@ char mode_1(int increment)
 
         integer_part = trunc(current);
         floating_part = ((current - integer_part)*100);
-        char sign;
-        if (current > 0)
-                sign = ' ';
-        else
-        {
-                integer_part = -integer_part;
-                floating_part = -floating_part;
-                sign = '-';
-        }
 
         char lcd_string[9];
-        sprintf(lcd_string, "%c%2d.%02d mA", sign, integer_part, floating_part);
+        sprintf(lcd_string, "%2d.%02d mA", integer_part, floating_part);
         hmi.WriteString(0, 0, lcd_string);
 
 
@@ -186,7 +177,7 @@ char mode_1(int increment)
 //rdt:
 char mode_2(int increment)
 {
-        hmi.WriteString(11, 0, "         ");
+        hmi.WriteString(11, 0, "Fermium  ");
         return 3; //goto next mode
 }
 //hall: resistance selected, just update lcd
@@ -211,19 +202,10 @@ char mode_3(int increment)
 
         integer_part = trunc(resistance);
         floating_part = ((resistance - integer_part)*10);
-        char sign;
-        if (resistance > 0)
-                sign = ' ';
-        else
-        {
-                integer_part = -integer_part;
-                floating_part = -floating_part;
-                sign = '-';
-        }
 
         //[needed] check and fix format
         char lcd_string[9];
-        sprintf(lcd_string, "%c%4d.%01d%c", sign, integer_part, floating_part, 0b11110100); //0 is the OMEGA char
+        sprintf(lcd_string, "%4d.%01d%c", integer_part, floating_part, 0b11110100); //0 is the OMEGA char
 
         hmi.WriteString (0,1, lcd_string);
         // [needed] code print float
@@ -241,7 +223,7 @@ char mode_4(int increment)
         pga_vr.Set(char (index), 0);
 
         char lcd_string[9];
-        sprintf(lcd_string, "Gain: %d", pga_vr.GetSetGain() );
+        sprintf(lcd_string, "Vr G: %3d", pga_vr.GetSetGain() );
         hmi.WriteString(11,1, lcd_string);
 
         return 4;

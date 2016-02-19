@@ -49,25 +49,18 @@ public:
                 _lcd_unabstracted.setCursor(0, 0);
                 _lcd_unabstracted.noCursor();
 
-                //create a custom char for omega
-                byte CHAR_OMEGA[8] = {
-                        0b00000,
-                        0b01110,
-                        0b10001,
-                        0b11011,
-                        0b01010,
-                        0b11011,
-                        0b00000,
-                        0b00000
-                };
-                _lcd_unabstracted.createChar(0, CHAR_OMEGA);
 
                 pinMode(A1, OUTPUT);
                 digitalWrite(A1, LOW);
 
         }
 
-
+        void RowClean(int col_start,int col_end,int row)
+        {
+                for(int i=col_start; i<col_end; i++) {
+                        _LCD_array[i][row][1]=' ';
+                }
+        }
         void Clean ()
         {
                 const char emptystring[21] = "                    ";
@@ -75,8 +68,27 @@ public:
                 WriteString(0,1, (char*) emptystring);
                 WriteString(0,2, (char*) emptystring);
                 WriteString(0,3, (char*) emptystring);
+                _lcd_unabstracted.clear();
+
 
         }
+        void ForceRewrite ()
+        {
+                //_lcd_unabstracted.clear();
+
+                for (char column=0; column != LCD_LENGHT; column++)
+                {
+                        for (char row=0; row!=LCD_HEIGHT; row++)
+                        {
+                                //lcd set cursor at column, row
+                                _lcd_unabstracted.setCursor(column, row);
+                                _lcd_unabstracted.write(_LCD_array[column][row][1]);
+                                _LCD_array[column][row][0] = _LCD_array[column][row][1];
+                        }
+                }
+
+        }
+
         void Buzzer(bool on)
         {
                 if(on)
@@ -93,14 +105,12 @@ public:
                         tone(A1, frequency);
                 else
                         noTone(A1);
-
         }
 
 
         //custom bootscreen for LCD
         void SplashScreen(char* sample_type)
         {
-
                 //the boot bypass our interface
                 _lcd_unabstracted.setCursor(0, 0);
                 _lcd_unabstracted.print(F("    Hall  Effect    "));
@@ -112,7 +122,6 @@ public:
                 _lcd_unabstracted.print(F("Sample:   "));
                 _lcd_unabstracted.print(sample_type);
                 _lcd_unabstracted.print(F("-doped"));
-
         }
 
         //writes a string to the LCD array
@@ -141,8 +150,6 @@ public:
 
 
         #endif
-
-
 
 private:
         char _LCD_array[LCD_LENGHT][LCD_HEIGHT][2]; //[][][0] is written, [][][1] to be written

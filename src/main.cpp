@@ -225,7 +225,7 @@ char mode_3(int increment)
         char lcd_string[9];
         sprintf(lcd_string, "%c%4d.%01d%c", sign, integer_part, floating_part, 0b11110100); //0 is the OMEGA char
 
-        hmi.WriteString (0,2, lcd_string);
+        hmi.WriteString (0,1, lcd_string);
         // [needed] code print float
         return 3;
 }
@@ -242,7 +242,7 @@ char mode_4(int increment)
 
         char lcd_string[9];
         sprintf(lcd_string, "Gain: %d", pga_vr.GetSetGain() );
-        hmi.WriteString(11,2, lcd_string);
+        hmi.WriteString(11,1, lcd_string);
 
         return 4;
 }
@@ -277,7 +277,7 @@ char mode_5(int increment)
         char lcd_string[9];
         sprintf(lcd_string, "%c%2d.%02d", sign, integer_part, floating_part);
 
-        hmi.WriteString(0,3, lcd_string);
+        hmi.WriteString(0,2, lcd_string);
         return 5;
 }
 //hall: heating element power selected, update it and LCD
@@ -362,7 +362,7 @@ char mode_8(int increment)
         char lcd_string[9];
         sprintf(lcd_string, "%d", pga_vh.GetSetGain() );
 
-        hmi.WriteString(11,4, lcd_string);
+        hmi.WriteString(11,3, lcd_string);
 
         return 8;
 }

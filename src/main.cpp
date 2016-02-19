@@ -68,19 +68,17 @@ void timerIsr() {
 
         milliseconds++;
         encoder->service(); //execute encoder stuff
-
-        if ((millisecond % 1000) == 0) //every 1s
+/*
+        if ((milliseconds % 10000) == 0)
         {
-          hmi.update;
+          hmi.Update();
         }
-
+*/
 }
 
 //int main(void)
 void setup ()
 {
-
-
 
         hmi.Begin();
 
@@ -90,7 +88,7 @@ void setup ()
         pinMode(13, OUTPUT); //CLK
 
         delay(100);
-        hmi.SplashScreen();
+        hmi.SplashScreen(SAMPLE_TYPE);
         delay(2500);
         //MPC3304 is already initialized
         //PGAs are already initialized

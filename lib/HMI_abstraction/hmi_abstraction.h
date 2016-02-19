@@ -86,8 +86,9 @@ public:
                 _lcd_unabstracted.setCursor(0, 2);
                 _lcd_unabstracted.print(F("web: fermiumlabs.com"));
                 _lcd_unabstracted.setCursor(0, 3);
-                _lcd_unabstracted.print(F(strcat(strcat("Sample:   ",sample_type),"-doped")));
-
+                _lcd_unabstracted.print(F("Sample:   "));
+                _lcd_unabstracted.print(sample_type);
+                _lcd_unabstracted.print(F("-doped"));
 
         }
 

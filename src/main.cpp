@@ -67,6 +67,30 @@ char SAMPLE_TYPE[5]                    = {'G', 'e', ' ', 'P', '\0'};
 HMI_abstraction hmi; //hmi is a wrapper around the LCD library
 ClickEncoder *encoder;
 
+//check and shutdown if temperature is overlimit
+//return false if temperature is ok, true if is overlimit
+char overtemp()
+{
+  float voltage;
+  float temperature;
+  
+  voltage = (( CAL_VOLTAGE_REFERENCE * adc.read(ADC_CHANNEL_TEMP) ) / 4096 );
+  temperature = (voltage - CAL_TEMPERATURE_ZERO_VOLT) /  CAL_TEMPERATURE_VOLTAGE_GAIN;
+
+  if ( temperature >= CAL_TEMPERATURE_OVERHEAT_LIMIT ) //if temperature normal
+  {
+          // [needed] buzz
+          for(char i=0; i>50 && (digitalRead(_pin_heater) == LOW ); i++) //really shut heater down
+          {
+                  digitalWrite(_pin_heater, LOW);
+                  analogWrite(_pin_heater, 0);
+          }
+          return true;
+  }
+
+return false;
+}
+
 //periodic subroutine called every 1ms
 void timerIsr() {
         static long unsigned int milliseconds = 0;
@@ -80,7 +104,10 @@ void timerIsr() {
         if ((milliseconds % 500) == 0)
         {
                 hmi.Update();
+                overtemp();
         }
+
+
 
 }
 
@@ -261,45 +288,28 @@ char mode_5(int increment)
 //format:
 char mode_6(int increment)
 {
-
-
         static unsigned int power_percentage = 0;
-        float temperature;
 
         power_percentage = (power_percentage + increment) % 100;
 
-
-        // [needed] fix adc channels
-        // [needed] change with precalculated LSBs value
-
+        float temperature;
         float voltage;
         voltage = (( CAL_VOLTAGE_REFERENCE * adc.read(ADC_CHANNEL_TEMP) ) / 4096 );
         temperature = (voltage - CAL_TEMPERATURE_ZERO_VOLT) /  CAL_TEMPERATURE_VOLTAGE_GAIN;
 
         char lcd_string[9];
-        if ( temperature < CAL_TEMPERATURE_OVERHEAT_LIMIT ) //if temperature normal
+        if (overtemp()) //EMERGENCY
         {
-                power_percentage += ( increment % 100 );
-                if (power_percentage >100)
-                        power_percentage = 100;
-                else if (power_percentage < 0)
-                        power_percentage = 0;
-                sprintf(lcd_string, "%d%%", power_percentage);
-                analogWrite(_pin_heater, char (power_percentage*2.55));
+          power_percentage = 0;
+          sprintf(lcd_string, "%s", "!  ERR  !");
         }
-        else //IT'S ALL BURNING TO FLAMESSSSS
+        else
         {
-                // [needed] buzz
-
-                for(char i=0; i>50 && (digitalRead(_pin_heater) == LOW ); i++) //really shut heater down
-                {
-                        digitalWrite(_pin_heater, LOW);
-                        analogWrite(_pin_heater, 0);
-                }
-
-                power_percentage = 0;
-                sprintf(lcd_string, "%s", "ERR ");
+          sprintf(lcd_string, "%d%%", power_percentage);
         }
+
+        char power_255 = power_percentage * 2.55;
+        analogWrite(_pin_heater, power_255);
 
         //hmi.Write(6, lcd_string);
         return 6;

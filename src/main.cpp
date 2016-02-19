@@ -158,10 +158,11 @@ char mode_1(int increment)
 
         return 1;
 }
-//hall: nothing selected, nothing to do
+//hall: nothing selected, nothing to do (maybe debug message? or some other kind of message? should think)
 //rdt:
 char mode_2(int increment)
 {
+
         return 3; //goto next mode
 }
 //hall: resistance selected, just update lcd
@@ -198,9 +199,9 @@ char mode_3(int increment)
 
         //[needed] check and fix format
         char lcd_string[9];
-        sprintf(lcd_string, "%c%4d.%01d%c", sign, integer_part, floating_part, 0); //0 is the OMEGA char
+        sprintf(lcd_string, "%c%4d.%01d%c", sign, integer_part, floating_part, 0b11110100); //0 is the OMEGA char
 
-        //hmi.Write(3, lcd_string);
+        hmi.WriteString (0,2, lcd_string);
         // [needed] code print float
         return 3;
 }
@@ -216,8 +217,8 @@ char mode_4(int increment)
         pga_vr.Set(char (index), 0);
 
         char lcd_string[9];
-        sprintf(lcd_string, "%d", pga_vr.GetSetGain() );
-        //hmi.Write(4, lcd_string);
+        sprintf(lcd_string, "Gain: %d", pga_vr.GetSetGain() );
+        hmi.WriteString(11,2, lcd_string);
 
         return 4;
 }
@@ -252,7 +253,7 @@ char mode_5(int increment)
         char lcd_string[9];
         sprintf(lcd_string, "%c%2d.%02d", sign, integer_part, floating_part);
 
-        //hmi.Write(5, lcd_string);
+        hmi.Write(0,3, lcd_string);
         return 5;
 }
 //hall: heating element power selected, update it and LCD
@@ -301,7 +302,7 @@ char mode_6(int increment)
                 sprintf(lcd_string, "%s", "ERR ");
         }
 
-        //hmi.Write(6, lcd_string);
+        hmi.Write(11,2, lcd_string);
         return 6;
 }
 //hall: hall voltage selected, update LCD
@@ -334,9 +335,9 @@ char mode_7(int increment)
         }
 
         char lcd_string[9];
-        sprintf(lcd_string, "%c%2d.%03dmV", sign, integer_part, floating_part);
+        sprintf(lcd_string, "%c%2d.%03d mV", sign, integer_part, floating_part);
 
-        //hmi.Write(7, lcd_string);
+        hmi.Write(0,3, lcd_string);
 
         return 7;
 }
@@ -354,7 +355,7 @@ char mode_8(int increment)
         char lcd_string[9];
         sprintf(lcd_string, "%d", pga_vh.GetSetGain() );
 
-        //hmi.Write(8, lcd_string);
+        hmi.Write(11,4, lcd_string);
 
         return 8;
 }

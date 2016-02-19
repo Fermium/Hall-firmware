@@ -64,18 +64,23 @@ ClickEncoder *encoder;
 
 //periodic subroutine called every 1ms
 void timerIsr() {
+        static long unsigned int milliseconds = 0;
+
+        milliseconds++;
         encoder->service(); //execute encoder stuff
+
+        if ((millisecond % 1000) == 0) //every 1s
+        {
+          hmi.update;
+        }
+
 }
 
 //int main(void)
 void setup ()
 {
-        encoder = new ClickEncoder(4, 3, 14); //not really a fan of new...
-        encoder->setAccelerationEnabled(true); //enable cool acceleration feeling
 
-        //interrupt for the encoder reading and other useful stuff
-        Timer1.initialize(1000);
-        Timer1.attachInterrupt(timerIsr);
+
 
         hmi.Begin();
 
@@ -92,8 +97,15 @@ void setup ()
 
         //call the main loop
         //while(true)
-      //    loop();
-      //  return 1;
+        //    loop();
+        //  return 1;
+
+       encoder = new ClickEncoder(4, 3, 14); //not really a fan of new...
+       encoder->setAccelerationEnabled(true); //enable cool acceleration feeling
+
+       //interrupt for the encoder reading and other useful stuff
+       Timer1.initialize(1000);
+       Timer1.attachInterrupt(timerIsr);
 
 }
 
@@ -433,10 +445,15 @@ void loop()
 
         if( MAIN_DEBUG )
         {
-          
+
         //DEBUG START
 
         //Serial.begin(9600);
+
+        hmi.WriteString(0,0,"aaa");
+        hmi.Update();
+
+
         while(true)
         {
           //Serial.println(adc.read(7));

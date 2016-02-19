@@ -168,10 +168,10 @@ char mode_1(int increment)
         floating_part = ((current - integer_part)*100);
 
         char lcd_string[9];
-        sprintf(lcd_string, "%2d.%02d mA", integer_part, floating_part);
+        sprintf(lcd_string, "%d.%02d", integer_part, floating_part);
         hmi.RowClean(0,9,0);
         hmi.WriteString(0, 0, lcd_string);
-
+        hmi.WriteString(7,0,"mA");
 
         return 3;
 }
@@ -179,11 +179,9 @@ char mode_1(int increment)
 //rdt:
 char mode_2(int increment)
 {
-        int dec_prec=abs(ceil(log10(fabs((CAL_VOLTAGE_REFERENCE*1000)/(pga_vh.GetSetGain()*CAL_FIXED_GAIN_VHALL*ADC_RESOLUTION)))));
-        char temp[3];
-        sprintf(temp,"%d",dec_prec);
-        //hmi.RowClean(11,20,0);
-        //hmi.WriteString(11, 0, /*" Fermium "*/ temp);
+
+        hmi.WriteString(11,0,"Fermium");
+
         return 3; //goto next mode
 }
 //hall: resistance selected, just update lcd
@@ -216,13 +214,16 @@ char mode_3(int increment)
         floating_part = ((resistance - integer_part)*10);
 
         //sprintf creates the format string for the next sprintf with the right precision
-        sprintf(format,"%%3d.%%0%dd %%c",prec);
+        sprintf(format,"%%d.%%0%dd",prec);
         //[needed] check and fix format
         char lcd_string[9];
         // dah usual shit here
-        sprintf(lcd_string, format, integer_part, floating_part, 0b11110100);
+        sprintf(lcd_string, format, integer_part, floating_part);
         hmi.RowClean(0,9,1);
         hmi.WriteString (0,1, lcd_string);
+        char ohm[2];
+        sprintf(ohm,"%c",0b11110100);
+        hmi.WriteString(8,1,ohm);
         mode_2(0);
         // [needed] code print float
         return 4;
@@ -274,9 +275,12 @@ char mode_5(int increment)
         }
 
         char lcd_string[9];
-        sprintf(lcd_string, "%c%3d.%02d%cC", sign, integer_part, floating_part,0b11011111);
+        sprintf(lcd_string, "%c%3d.%01d", sign, integer_part, floating_part);
         hmi.RowClean(0,9,2);
         hmi.WriteString(0,2, lcd_string);
+        char celsius[3];
+        sprintf(celsius,"%cC",0b11011111);
+        hmi.WriteString(7,2,celsius);
         return 6;
 }
 //hall: heating element power selected, update it and LCD
@@ -302,7 +306,7 @@ char mode_6(int increment)
         }
         else
         {
-                sprintf(lcd_string, "Pwr %3d %%", power_percentage);
+                sprintf(lcd_string, "Pwr :%3d%%", power_percentage);
         }
 
         char power_255 = power_percentage * 2.55;
@@ -327,34 +331,18 @@ char mode_7(int increment)
         unsigned int integer_part;
         unsigned int floating_part;
 
-        //integer_part = trunc(voltage * 1000.0);
-        //floating_part = ((voltage * 1000.0 - integer_part) * 1000.0);
         float dec_prec;
-        dec_prec=ceil(fabs(log10(((5*1000.0)/(pga_vh.GetSetGain()*  1*4096)))));
-        char aaa[10];
+        dec_prec=ceil(fabs(log10(((CAL_VOLTAGE_REFERENCE*1000.0)/(pga_vh.GetSetGain() * CAL_FIXED_GAIN_VHALL*ADC_RESOLUTION)))));
 
-        char lcd_string[9];
-        float gain_tot;
-        gain_tot = pga_vh.GetSetGain() * CAL_FIXED_GAIN_VHALL;
-        float max_meas = 0;
-        max_meas =  5.0 / (gain_tot);
-        float voltage_res;
-        voltage_res=(max_meas*1000.0)/ADC_RESOLUTION;
-        float log_10;
-        log_10=log10(voltage_res);
-        float ceiled;
-        ceiled=ceil(fabs(log_10));
         integer_part = trunc(voltage );
-        floating_part=((voltage  - integer_part) * pow(10,ceiled));
-        sprintf(aaa,"%d", (int)(ceiled));
-
-        hmi.RowClean(11,21,0);
-        hmi.WriteString(11,0, aaa);
+        floating_part=((voltage  - integer_part) * pow(10,dec_prec));
+        char lcd_string[9];
         char format[10];
-        sprintf(format,"%%d.%%0%dd",(int)ceiled);
-        sprintf(lcd_string,format, (int)integer_part, (int)(fabs(floating_part)));
+        sprintf(format,"%%d.%%0%dd",(int)dec_prec);
+        sprintf(lcd_string,format, integer_part, (abs(floating_part)));
         hmi.RowClean(0,9,3);
         hmi.WriteString(0,3, lcd_string);
+        hmi.WriteString(7,3,"mV");
         //delay(300);
         return 8;
 }
@@ -412,6 +400,7 @@ void loop()
 
                 //number of rotations of the encoder
                 encoder_notches = -encoder->getValue();
+
                 setup_screen(mode);
                 //call the mode subroutine, pass the rotation of the encoder
                 switch (mode)

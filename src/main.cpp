@@ -59,7 +59,7 @@ char  SAMPLE_TYPE[5]                   = {'G', 'e', ' ', 'P', '\0'};
 #endif
 
 
-hmi_abstraction hmi; //hmi is a wrapper around the LCD library
+HMI_abstraction hmi; //hmi is a wrapper around the LCD library
 ClickEncoder *encoder;
 
 //periodic subroutine called every 1ms

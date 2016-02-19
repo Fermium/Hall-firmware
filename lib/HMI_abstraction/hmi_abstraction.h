@@ -23,8 +23,18 @@
 #include <LiquidCrystal.h>
 
 //LiquidCrystal(rs, enable, d4, d5, d6, d7)
-LiquidCrystal _lcd_unabstracted(2, 2, 2, 2, 2, 2); //cambiare numeri pin
+LiquidCrystal _lcd_unabstracted(2, 16, 17, 1, 18, 8); //cambiare numeri pin
+//PD2, PC2, PC3, PD1, PC4, PD0
 
+/*
+Arduino Ax pins as digital
+Pin 14 = Analog in 0
+Pin 15 = Analog in 1
+Pin 16 = Analog in 2
+Pin 17 = Analog in 3
+Pin 18 = Analog in 4
+Pin 19 = Analog in 5
+*/
 
 class HMI_abstraction {
 public:
@@ -33,10 +43,10 @@ public:
         {
                 //memset(_LCD_array, 0, (sizeof(_LCD_array)/sizeof(_LCD_array[0]))); //clear the array
                 const char emptystring[21] = "                    ";
-                WriteString(0,0, emptystring);
-                WriteString(0,1, emptystring);
-                WriteString(0,2, emptystring);
-                WriteString(0,3, emptystring);
+                WriteString(0,0, (char*) emptystring);
+                WriteString(0,1, (char*) emptystring);
+                WriteString(0,2, (char*) emptystring);
+                WriteString(0,3, (char*) emptystring);
 
                 //lcd init code
                 _lcd_unabstracted.begin(LCD_LENGHT, LCD_HEIGHT);
@@ -44,7 +54,7 @@ public:
                 _lcd_unabstracted.noCursor();
 
                 //create a custom char for omega
-                const byte CHAR_OMEGA[8] = {
+                byte CHAR_OMEGA[8] = {
                         0b00000,
                         0b01110,
                         0b10001,

@@ -189,7 +189,7 @@ char mode_3(int increment)
         float current;
         float voltage;
         float resistance;
-
+        char unit='';
         // [needed] fix adc channels
         current = ((( CAL_VOLTAGE_REFERENCE * adc.read(ADC_CHANNEL_CURRENT) ) / 4096 ) / CAL_SHUNT_RESISTOR );
         voltage = (( CAL_VOLTAGE_REFERENCE * adc.read(ADC_CHANNEL_VR) ) / 4096 );
@@ -205,7 +205,7 @@ char mode_3(int increment)
 
         //[needed] check and fix format
         char lcd_string[9];
-        sprintf(lcd_string, "%4d.%01d%c", integer_part, floating_part, 0b11110100); //0 is the OMEGA char
+        sprintf(lcd_string, "%4d.%02d %c%c", integer_part, floating_part,unit, 0b11110100); //0 is the OMEGA char
 
         hmi.WriteString (0,1, lcd_string);
         // [needed] code print float
@@ -223,7 +223,7 @@ char mode_4(int increment)
         pga_vr.Set(char (index), 0);
 
         char lcd_string[9];
-        sprintf(lcd_string, "Vr G: %3d", pga_vr.GetSetGain() );
+        sprintf(lcd_string, "Vr G:x%3d", pga_vr.GetSetGain() );
         hmi.WriteString(11,1, lcd_string);
 
         return 4;
@@ -257,7 +257,7 @@ char mode_5(int increment)
         }
 
         char lcd_string[9];
-        sprintf(lcd_string, "%c%2d.%02d", sign, integer_part, floating_part);
+        sprintf(lcd_string, "%c%3d.%02d%cC", sign, integer_part, floating_part,0b11011110);
 
         hmi.WriteString(0,2, lcd_string);
         return 5;
@@ -342,7 +342,7 @@ char mode_8(int increment)
         pga_vh.Set((char) index, 0);
 
         char lcd_string[9];
-        sprintf(lcd_string, "%d", pga_vh.GetSetGain() );
+        sprintf(lcd_string, "Vh G:x%3d", pga_vh.GetSetGain() );
 
         hmi.WriteString(11,3, lcd_string);
 

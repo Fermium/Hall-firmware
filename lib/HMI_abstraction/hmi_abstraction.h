@@ -42,11 +42,7 @@ public:
         void Begin (void)
         {
                 //memset(_LCD_array, 0, (sizeof(_LCD_array)/sizeof(_LCD_array[0]))); //clear the array
-                const char emptystring[21] = "                    ";
-                WriteString(0,0, (char*) emptystring);
-                WriteString(0,1, (char*) emptystring);
-                WriteString(0,2, (char*) emptystring);
-                WriteString(0,3, (char*) emptystring);
+                Clean();
 
                 //lcd init code
                 _lcd_unabstracted.begin(LCD_LENGHT, LCD_HEIGHT);
@@ -72,6 +68,15 @@ public:
         }
 
 
+        void Clean ()
+        {
+                const char emptystring[21] = "                    ";
+                WriteString(0,0, (char*) emptystring);
+                WriteString(0,1, (char*) emptystring);
+                WriteString(0,2, (char*) emptystring);
+                WriteString(0,3, (char*) emptystring);
+
+        }
         void Buzzer(bool on)
         {
                 if(on)

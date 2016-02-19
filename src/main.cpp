@@ -68,12 +68,15 @@ void timerIsr() {
 
         milliseconds++;
         encoder->service(); //execute encoder stuff
-/*
-        if ((milliseconds % 10000) == 0)
+        bool aaa = false;
+        aaa = !aaa;
+        //digitalWrite(A1, aaa);
+
+        if ((milliseconds % 500) == 0)
         {
           hmi.Update();
         }
- */
+
 }
 
 //int main(void)
@@ -98,12 +101,14 @@ void setup ()
         //    loop();
         //  return 1;
 
-        encoder = new ClickEncoder(4, 3, 14); //not really a fan of new...
-        encoder->setAccelerationEnabled(true); //enable cool acceleration feeling
-
         //interrupt for the encoder reading and other useful stuff
         Timer1.initialize(1000);
         Timer1.attachInterrupt(timerIsr);
+
+        encoder = new ClickEncoder(4, 3, 14); //not really a fan of new...
+        encoder->setAccelerationEnabled(true); //enable cool acceleration feeling
+
+
 
 }
 
@@ -446,16 +451,48 @@ void loop()
                 //DEBUG START
                 //Serial.begin(9600);
 
-                hmi.WriteString(0,0,"aaa");
+                //hmi.WriteString(0,0,"aaa");
                 hmi.Update();
-
 
                 while(true)
                 {
-                        hmi.Buzzer(true);
-                        delay(1000);
-                        hmi.Buzzer(false);
-                        delay(1000);
+                        //hmi.Clean();
+                        static int16_t encoder_notches2 = 0;
+                        encoder_notches2 += encoder->getValue();
+                        char temp[10];
+                        sprintf(temp, "%d     ", encoder_notches2);
+                        hmi.WriteString(0,0,temp);
+                        //hmi.Update();
+                        //delay(500);
+                        //hmi.Buzzer(true, 1000);
+                        //delay(1000);
+                        //hmi.Buzzer(false);
+                        //delay(1000);
+
+
+                        ClickEncoder::Button b = encoder->getButton(); //b is button status
+                        if(b != ClickEncoder::Open) //if the button has been pressed
+                        {
+                                switch (b) {
+                                case ClickEncoder::Pressed:
+                                hmi.WriteString(0,1,"Pressed");
+                                break;
+                                case ClickEncoder::Clicked:
+                                        hmi.WriteString(0,1,"Clicked");
+                                        break;
+                                case ClickEncoder::Held:
+                                hmi.WriteString(0,1,"Held");
+                                        //nothing to do, really
+                                        break;
+                                case ClickEncoder::Released:
+                                hmi.WriteString(0,1,"Released");
+                                        //nothing to do, really
+                                        break;
+                                case ClickEncoder::DoubleClicked:
+                                        hmi.WriteString(0,1,"DoubleClicked");
+                                        break;
+                                }
+                        }
 
                 }
 

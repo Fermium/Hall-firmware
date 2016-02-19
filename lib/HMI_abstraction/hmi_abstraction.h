@@ -70,24 +70,23 @@ public:
                 WriteString(0,3, (char*) emptystring);
                 _lcd_unabstracted.clear();
 
-
         }
+
         void ForceRewrite ()
         {
+                /*
                 //_lcd_unabstracted.clear();
-
-                for (char column=0; column != LCD_LENGHT; column++)
+                for (char row=0; row!=LCD_HEIGHT; row++)
                 {
-                        for (char row=0; row!=LCD_HEIGHT; row++)
-                        {
-                                //lcd set cursor at column, row
-                                _lcd_unabstracted.setCursor(column, row);
-                                _lcd_unabstracted.write(_LCD_array[column][row][1]);
-                                _LCD_array[column][row][0] = _LCD_array[column][row][1];
-                        }
-                }
+                        char temp[21];
+                        GetLine (row, temp, 1);
+                        _lcd_unabstracted.setCursor(0, row);
+                        _lcd_unabstracted.print(temp);
 
+                }
+                */
         }
+
 
         void Buzzer(bool on)
         {

@@ -169,7 +169,7 @@ char mode_1(int increment)
 
         char lcd_string[9];
         sprintf(lcd_string, "%2d.%02d mA", integer_part, floating_part);
-        hmi.RowClean(0,8,0);
+        hmi.RowClean(0,9,0);
         hmi.WriteString(0, 0, lcd_string);
 
 
@@ -179,8 +179,11 @@ char mode_1(int increment)
 //rdt:
 char mode_2(int increment)
 {
-        hmi.RowClean(11,20,1);
-        hmi.WriteString(11, 0, " Fermium ");
+        int dec_prec=abs(ceil(log10(fabs((CAL_VOLTAGE_REFERENCE*1000)/(pga_vh.GetSetGain()*CAL_FIXED_GAIN_VHALL*ADC_RESOLUTION)))));
+        char temp[3];
+        sprintf(temp,"%d",dec_prec);
+        //hmi.RowClean(11,20,0);
+        //hmi.WriteString(11, 0, /*" Fermium "*/ temp);
         return 3; //goto next mode
 }
 //hall: resistance selected, just update lcd
@@ -218,7 +221,7 @@ char mode_3(int increment)
         char lcd_string[9];
         // dah usual shit here
         sprintf(lcd_string, format, integer_part, floating_part, 0b11110100);
-        hmi.RowClean(0,8,1);
+        hmi.RowClean(0,9,1);
         hmi.WriteString (0,1, lcd_string);
         mode_2(0);
         // [needed] code print float
@@ -233,14 +236,13 @@ char mode_4(int increment)
         static int index = 0;
         index = constrain( (index + increment), 0, 7);
 
-
-        pga_vr.Set(char (index), 0);
+        if (increment != 0)
+                pga_vr.Set(char (index), 0);
 
         char lcd_string[9];
         sprintf(lcd_string, "Vr G:%3dx", pga_vr.GetSetGain() );
         hmi.RowClean(11,20,1);
         hmi.WriteString(11,1, lcd_string);
-
         return 4;
 }
 //hall: temperature selected, update LCD
@@ -273,7 +275,7 @@ char mode_5(int increment)
 
         char lcd_string[9];
         sprintf(lcd_string, "%c%3d.%02d%cC", sign, integer_part, floating_part,0b11011111);
-        hmi.RowClean(0,8,2);
+        hmi.RowClean(0,9,2);
         hmi.WriteString(0,2, lcd_string);
         return 6;
 }
@@ -325,14 +327,35 @@ char mode_7(int increment)
         unsigned int integer_part;
         unsigned int floating_part;
 
-        integer_part = trunc(voltage * 1000);
-        floating_part = ((voltage * 1000 - integer_part) * 1000);
+        //integer_part = trunc(voltage * 1000.0);
+        //floating_part = ((voltage * 1000.0 - integer_part) * 1000.0);
+        float dec_prec;
+        dec_prec=ceil(fabs(log10(((5*1000.0)/(pga_vh.GetSetGain()*  1*4096)))));
+        char aaa[10];
 
         char lcd_string[9];
-        sprintf(lcd_string, "%2d.%01d mV", integer_part, abs(floating_part));
-        hmi.RowClean(0,8,3);
-        hmi.WriteString(0,3, lcd_string);
+        float gain_tot;
+        gain_tot = pga_vh.GetSetGain() * CAL_FIXED_GAIN_VHALL;
+        float max_meas = 0;
+        max_meas =  5.0 / (gain_tot);
+        float voltage_res;
+        voltage_res=(max_meas*1000.0)/ADC_RESOLUTION;
+        float log_10;
+        log_10=log10(voltage_res);
+        float ceiled;
+        ceiled=ceil(fabs(log_10));
+        integer_part = trunc(voltage );
+        floating_part=((voltage  - integer_part) * pow(10,ceiled));
+        sprintf(aaa,"%d", (int)(ceiled));
 
+        hmi.RowClean(11,21,0);
+        hmi.WriteString(11,0, aaa);
+        char format[10];
+        sprintf(format,"%%d.%%0%dd",(int)ceiled);
+        sprintf(lcd_string,format, (int)integer_part, (int)(fabs(floating_part)));
+        hmi.RowClean(0,9,3);
+        hmi.WriteString(0,3, lcd_string);
+        //delay(300);
         return 8;
 }
 //hall: hall gain selected, update value and LCD
@@ -344,7 +367,8 @@ char mode_8(int increment)
         static int index = 0;
         index = constrain( (index + increment), 0, 7);
 
-        pga_vh.Set((char) index, 0);
+        if (increment != 0)
+                pga_vh.Set((char) index, 0);
 
         char lcd_string[9];
         sprintf(lcd_string, "Vh G:%3dx", pga_vh.GetSetGain() );
@@ -403,6 +427,7 @@ void loop()
                         break;
                 case 4:
                         mode = mode_4(encoder_notches);
+                        hmi.Update();
                         break;
                 case 5:
                         mode = mode_5(encoder_notches);
@@ -415,13 +440,15 @@ void loop()
                         break;
                 case 8:
                         mode = mode_8(encoder_notches);
+                        hmi.Update();
                         break;
                 default:
                         mode = 0; //Just initialize screen and wait
+                        hmi.Update();
                         break;
                 }
 
-                if (   ( (cycles % 1000) == 0 )  &&  ( encoder_notches == 0 ) )
+                if ( (cycles % 1000) == 0  )
                 {
                         //every now and then just update the display
                         //if no user interaction has occurred
@@ -433,7 +460,7 @@ void loop()
                         mode_6(0);
                         mode_7(0);
                         mode_8(0);
-                        hmi.ForceRewrite();
+                        hmi.Update();
 
                 }
 
@@ -441,21 +468,6 @@ void loop()
 
         }
 
-        if( MAIN_DEBUG )
-        {
-                //DEBUG START
-                //Serial.begin(9600);
-
-                //hmi.WriteString(0,0,"aaa");
-                hmi.Update();
-
-                while(true)
-                {
-
-
-                }
-
-        }
 }
 
 void setup_screen(int selection){
@@ -486,6 +498,4 @@ void setup_screen(int selection){
                         hmi.WriteString(CENTER_RIGHT, (selection-1)/2,temp);
                 }
         }
-
-        hmi.Update();
 }

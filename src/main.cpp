@@ -83,21 +83,9 @@ void timerIsr() {
         }
 
 }
-void init_screen(){
-  unsigned char i=0;
-  for(i;i<4;i++){
-    hmi.WriteString(CENTER_LEFT,i,"||");
-  }
-  mode_1(0);
-  mode_2(0);
-  mode_3(0);
-  mode_4(0);
-  mode_5(0);
-  mode_6(0);
-  mode_7(0);
-  mode_0(0);
-  hmi.Update();
-}
+
+void init_screen();
+
 //int main(void)
 void setup ()
 {
@@ -474,45 +462,25 @@ void loop()
 
                 while(true)
                 {
-                        //hmi.Clean();
-                        static int16_t encoder_notches2 = 0;
-                        encoder_notches2 += encoder->getValue();
-                        char temp[10];
-                        sprintf(temp, "%d     ", encoder_notches2);
-                        hmi.WriteString(0,0,temp);
-                        //hmi.Update();
-                        //delay(500);
-                        //hmi.Buzzer(true, 1000);
-                        //delay(1000);
-                        //hmi.Buzzer(false);
-                        //delay(1000);
 
-
-                        ClickEncoder::Button b = encoder->getButton(); //b is button status
-                        if(b != ClickEncoder::Open) //if the button has been pressed
-                        {
-                                switch (b) {
-                                case ClickEncoder::Pressed:
-                                hmi.WriteString(0,1,"Pressed");
-                                break;
-                                case ClickEncoder::Clicked:
-                                        hmi.WriteString(0,1,"Clicked");
-                                        break;
-                                case ClickEncoder::Held:
-                                hmi.WriteString(0,1,"Held");
-                                        //nothing to do, really
-                                        break;
-                                case ClickEncoder::Released:
-                                hmi.WriteString(0,1,"Released");
-                                        //nothing to do, really
-                                        break;
-                                case ClickEncoder::DoubleClicked:
-                                        hmi.WriteString(0,1,"DoubleClicked");
-                                        break;
-                                }
-                        }
 
                 }
 
         }
+}
+
+void init_screen(){
+  unsigned char i=0;
+  for(i;i<4;i++){
+    hmi.WriteString(CENTER_LEFT,i,"||");
+  }
+  mode_1(0);
+  mode_2(0);
+  mode_3(0);
+  mode_4(0);
+  mode_5(0);
+  mode_6(0);
+  mode_7(0);
+  mode_8(0);
+  hmi.Update();
 }

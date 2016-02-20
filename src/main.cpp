@@ -60,7 +60,6 @@ const PROGMEM unsigned int ADC_RESOLUTION            = 4096;
 //pin hall/rdt
 #define PIN_HEATER 5
 
-
 #endif
 
 HMI_abstraction hmi; //hmi is a wrapper around the LCD library
@@ -68,6 +67,7 @@ ClickEncoder *encoder;
 
 //check and shutdown if temperature is overlimit
 //return false if temperature is ok, true if is overlimit
+//####### DO NOT TOUCH ! YOU RISK DAMAGING THE INSTRUMENT ! #######
 char overtemp()
 {
         float voltage;
@@ -76,7 +76,7 @@ char overtemp()
         voltage = (( CAL_VOLTAGE_REFERENCE * adc.read(ADC_CHANNEL_TEMP) ) / ADC_RESOLUTION );
         temperature = (voltage - CAL_TEMPERATURE_ZERO_VOLT) /  CAL_TEMPERATURE_VOLTAGE_GAIN;
 
-        if ( temperature >= CAL_TEMPERATURE_OVERHEAT_LIMIT ) //if temperature normal
+        if ( temperature >= CAL_TEMPERATURE_OVERHEAT_LIMIT ) //If Overheating
         {
                 // [needed] buzz
                 for(char i=0; i>50 && (digitalRead(PIN_HEATER) == LOW ); i++) //really shut heater down
@@ -94,7 +94,8 @@ char overtemp()
         }
 }
 
-//periodic subroutine called every 1ms
+//periodic ISR called every 1ms
+//has to be kept very fast and non-blocking
 void timerIsr() {
         encoder->service(); //execute encoder stuff
         if ((millis() % 500) == 0)
@@ -127,7 +128,6 @@ void setup ()
         encoder->setAccelerationEnabled(true); //enable cool acceleration feeling
         setup_screen(0); //reset vertical slashes
 
-
 }
 
 
@@ -138,82 +138,66 @@ void setup ()
  */
 
 //hall: current mode, just update lcd.
-//format: 99.99mA fixed range
 //rdt:
 //format:
 char mode_1(int increment)
 {
-        float current;
-        //remember IT guys, viva il re' d'italia
-        current = ((( CAL_VOLTAGE_REFERENCE * adc.read(ADC_CHANNEL_CURRENT) ) / ADC_RESOLUTION ) / CAL_SHUNT_RESISTOR );
+        //calculate current (yes, Ohm's law)
+        float current = ((( CAL_VOLTAGE_REFERENCE * adc.read(ADC_CHANNEL_CURRENT) ) / ADC_RESOLUTION ) / CAL_SHUNT_RESISTOR );
 
-        unsigned int integer_part;
-        unsigned int floating_part;
-
-        integer_part = trunc(current);
-        floating_part = ((current - integer_part)*100);
+        unsigned int integer_part = trunc(current);
+        unsigned int floating_part = ((current - integer_part)*100);
 
         char lcd_string[9];
         sprintf_P(lcd_string, PSTR("%d.%02d"), integer_part, floating_part);
-        hmi.RowClean(0,9,0);
+        hmi.Clean(0,9,0);
         hmi.WriteString(0, 0, lcd_string);
         hmi.WriteString(7,0,"mA");
 
-        return 3;
+        return 2; //jump to next mode
 }
-//hall: nothing selected, nothing to do (maybe debug message? or some other kind of message? should think)
+//hall: Show manufacturer name
 //rdt:
 char mode_2(int increment)
 {
-
         hmi.WriteString(11,0,"Fermium");
 
-        return 3; //goto next mode
+        return 3; //jump to next mode
 }
 //hall: resistance selected, just update lcd
-//format: 9999.9 fixed range
 //rdt:
 //format:
 char mode_3(int increment)
 {
-        float current;
-        float voltage;
-        float resistance;
-        char format[10];
-
         // [needed] fix adc channels
-        current = ((( CAL_VOLTAGE_REFERENCE * adc.read(ADC_CHANNEL_CURRENT) ) / ADC_RESOLUTION ) / CAL_SHUNT_RESISTOR );
-        voltage = (( CAL_VOLTAGE_REFERENCE * adc.read(ADC_CHANNEL_VR) ) / ADC_RESOLUTION );
+        float current = ((( CAL_VOLTAGE_REFERENCE * adc.read(ADC_CHANNEL_CURRENT) ) / ADC_RESOLUTION ) / CAL_SHUNT_RESISTOR );
+        float voltage = (( CAL_VOLTAGE_REFERENCE * adc.read(ADC_CHANNEL_VR) ) / ADC_RESOLUTION );
         voltage /= pga_vr.GetSetGain() * CAL_FIXED_GAIN_VRES; //compensate for PGA and OPAMP gain
-        resistance = voltage / current;
+        float resistance = voltage / current;
 
-        unsigned int integer_part;
-        unsigned int floating_part;
+        //dec_prec is the precision range for the selected Gain. This Uber-cool formula that simone found gets the precision
+        int dec_prec=floor(-log10(fabs(CAL_VOLTAGE_REFERENCE/(50*CAL_FIXED_GAIN_VRES*pga_vr.GetSetGain()))));
+        unsigned int integer_part = trunc(resistance);
+        unsigned int floating_part = ((resistance - integer_part)* pow(10,dec_prec) );
 
-        /*
-           prec is the precision range for the selected Gain. This Uber-cool formula that simone found gets the precision
-         */
-        int prec=floor(-log10(fabs(CAL_VOLTAGE_REFERENCE/(50*CAL_FIXED_GAIN_VRES*pga_vr.GetSetGain()))));
-        integer_part = trunc(resistance);
-        floating_part = ((resistance - integer_part)*10);
+        //create the format string for the next sprintf with the right number of decimals
+        char format[10];
+        sprintf_P(format,PSTR("%%d%c%%0%dd"), (dec_prec != 0) ? '.' : ' ', dec_prec);
 
-        //sprintf creates the format string for the next sprintf with the right precision
-        sprintf_P(format,PSTR("%%d.%%0%dd"),prec);
-        //[needed] check and fix format
+        //write to the lcd
         char lcd_string[9];
-        // dah usual shit here
         sprintf(lcd_string, format, integer_part, floating_part);
-        hmi.RowClean(0,9,1);
+        hmi.Clean(0,9,1);
         hmi.WriteString (0,1, lcd_string);
+
+        //write the OMEGA character
         char ohm[2];
         sprintf_P(ohm,PSTR("%c"),0b11110100);
         hmi.WriteString(8,1,ohm);
-        mode_2(0);
-        // [needed] code print float
-        return 4;
+
+        return 4; //jump to the next mode
 }
 //hall: resistance gain selected, update resistance gain and LCD
-//format: 1 to 200
 //rdt:
 //format:
 char mode_4(int increment)
@@ -226,12 +210,11 @@ char mode_4(int increment)
 
         char lcd_string[9];
         sprintf_P(lcd_string, PSTR("Vr G:%3dx"), pga_vr.GetSetGain() );
-        hmi.RowClean(11,20,1);
+        hmi.Clean(11,20,1);
         hmi.WriteString(11,1, lcd_string);
         return 4;
 }
 //hall: temperature selected, update LCD
-//format: -250 to +250 (celsiuls degrees)
 //rdt:
 //format:
 char mode_5(int increment)
@@ -242,23 +225,20 @@ char mode_5(int increment)
         voltage = (( CAL_VOLTAGE_REFERENCE * adc.read(ADC_CHANNEL_TEMP) ) / ADC_RESOLUTION );
         temperature = (voltage - CAL_TEMPERATURE_ZERO_VOLT) /  CAL_TEMPERATURE_VOLTAGE_GAIN;
 
-        unsigned int integer_part;
-        unsigned int floating_part;
-
-        integer_part = trunc(temperature);
-        floating_part = ((temperature - integer_part)*100);
+        unsigned int integer_part = trunc(temperature);
+        unsigned int floating_part = ((temperature - integer_part)*100);
 
         char lcd_string[9];
         sprintf_P(lcd_string, PSTR("%3d.%01d"), integer_part, abs(floating_part));
-        hmi.RowClean(0,9,2);
+        hmi.Clean(0,9,2);
         hmi.WriteString(0,2, lcd_string);
         char celsius[3];
         sprintf_P(celsius,PSTR("%cC"),0b11011111);
         hmi.WriteString(7,2,celsius);
-        return 6;
+
+        return 6; //jump to the next mode
 }
 //hall: heating element power selected, update it and LCD
-//format 100% or ERR
 //rdt:
 //format:
 char mode_6(int increment)
@@ -266,10 +246,8 @@ char mode_6(int increment)
         static int power_percentage = 0;
         power_percentage = constrain((power_percentage + increment), 0, 100);
 
-        float temperature;
-        float voltage;
-        voltage = (( CAL_VOLTAGE_REFERENCE * adc.read(ADC_CHANNEL_TEMP) ) / ADC_RESOLUTION );
-        temperature = (voltage - CAL_TEMPERATURE_ZERO_VOLT) /  CAL_TEMPERATURE_VOLTAGE_GAIN;
+        float voltage = (( CAL_VOLTAGE_REFERENCE * adc.read(ADC_CHANNEL_TEMP) ) / ADC_RESOLUTION );
+        float temperature = (voltage - CAL_TEMPERATURE_ZERO_VOLT) /  CAL_TEMPERATURE_VOLTAGE_GAIN;
 
         char lcd_string[9];
         if (overtemp()) //EMERGENCY
@@ -282,14 +260,14 @@ char mode_6(int increment)
                 sprintf_P(lcd_string, PSTR("Pwr :%3d%%"), power_percentage);
         }
 
-        char power_255 = power_percentage * 2.55;
+        char power_255 = constrain( (power_percentage * 2.55 ), 0, 255);
+
         analogWrite(PIN_HEATER, power_255);
-        hmi.RowClean(11,20,2);
+        hmi.Clean(11,20,2);
         hmi.WriteString(11,2, lcd_string);
         return 6;
 }
 //hall: hall voltage selected, update LCD
-//format: +99.999mV fixed range
 //rdt:
 //format:
 char mode_7(int increment)
@@ -300,26 +278,21 @@ char mode_7(int increment)
         voltage -= CAL_HALL_ZERO_VOLTAGE;   //voltage output relative to 2.5V ground
         voltage /= pga_vh.GetSetGain() * CAL_FIXED_GAIN_VHALL;     //compensate for PGA and OPAMP gain
 
-        unsigned int integer_part;
-        unsigned int floating_part;
+        float dec_prec = floor(fabs(log10(((CAL_VOLTAGE_REFERENCE*1000.0)/(pga_vh.GetSetGain() * CAL_FIXED_GAIN_VHALL*ADC_RESOLUTION)))));
 
-        float dec_prec; //number of decimal digits
-        dec_prec=floor(fabs(log10(((CAL_VOLTAGE_REFERENCE*1000.0)/(pga_vh.GetSetGain() * CAL_FIXED_GAIN_VHALL*ADC_RESOLUTION)))));
-
-        integer_part = trunc(voltage );
-        floating_part=((voltage  - integer_part) * pow(10,dec_prec));
+        unsigned int integer_part = trunc(voltage );
+        unsigned int floating_part=((voltage  - integer_part) * pow(10,dec_prec));
         char lcd_string[9];
         char format[10];
-        sprintf_P(format,PSTR("%%d.%%0%dd"),(int)dec_prec);
+        sprintf_P(format,PSTR("%%d%c%%0%dd"),(dec_prec != 0) ? '.' : ' ',(int)dec_prec);
         sprintf(lcd_string, format, integer_part, (abs(floating_part)));
-        hmi.RowClean(0,9,3);
+        hmi.Clean(0,9,3);
         hmi.WriteString(0,3, lcd_string);
         hmi.WriteString(7,3,"mV");
 
         return 8;
 }
 //hall: hall gain selected, update value and LCD
-//format: from 1 to 200
 //rdt:
 //format:
 char mode_8(int increment)
@@ -332,7 +305,7 @@ char mode_8(int increment)
 
         char lcd_string[9];
         sprintf_P(lcd_string, PSTR("Vh G:%3dx"), pga_vh.GetSetGain() );
-        hmi.RowClean(11,20,3);
+        hmi.Clean(11,20,3);
         hmi.WriteString(11,3, lcd_string);
 
         return 8;
@@ -421,6 +394,9 @@ void loop()
                 mode_8(0);
                 hmi.Update();
 
+                //clear display every few minutes
+                if (cycles % 60000L == 0)
+                        hmi.ForceRewrite();
         }
 
         encoder_notches = 0;

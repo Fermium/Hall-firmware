@@ -193,7 +193,7 @@ char mode_3(int increment)
         /*
            prec is the precision range for the selected Gain. This Uber-cool formula that simone found gets the precision
          */
-        int prec=ceil(-log10(fabs(CAL_VOLTAGE_REFERENCE/(50*CAL_FIXED_GAIN_VRES*pga_vr.GetSetGain()))));
+        int prec=floor(-log10(fabs(CAL_VOLTAGE_REFERENCE/(50*CAL_FIXED_GAIN_VRES*pga_vr.GetSetGain()))));
         integer_part = trunc(resistance);
         floating_part = ((resistance - integer_part)*10);
 
@@ -304,7 +304,7 @@ char mode_7(int increment)
         unsigned int floating_part;
 
         float dec_prec; //number of decimal digits
-        dec_prec=ceil(fabs(log10(((CAL_VOLTAGE_REFERENCE*1000.0)/(pga_vh.GetSetGain() * CAL_FIXED_GAIN_VHALL*ADC_RESOLUTION)))));
+        dec_prec=floor(fabs(log10(((CAL_VOLTAGE_REFERENCE*1000.0)/(pga_vh.GetSetGain() * CAL_FIXED_GAIN_VHALL*ADC_RESOLUTION)))));
 
         integer_part = trunc(voltage );
         floating_part=((voltage  - integer_part) * pow(10,dec_prec));

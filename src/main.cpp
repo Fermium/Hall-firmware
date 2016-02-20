@@ -9,7 +9,6 @@
 //please use the tag  [needed] for code that need to be fixed
 // [needed] move encoder inside hmi
 
-
 /* DISPLAY FORMAT
    12.34  mA||
    1234.45 O||Vr G=200
@@ -33,10 +32,10 @@
 #ifdef APPARATUS_HALL
 
 //adc channel definitions definitions
-  #define ADC_CHANNEL_VH      0
-  #define ADC_CHANNEL_VR      1
-  #define ADC_CHANNEL_TEMP    2
-  #define ADC_CHANNEL_CURRENT 3
+#define ADC_CHANNEL_VH      0
+#define ADC_CHANNEL_VR      1
+#define ADC_CHANNEL_TEMP    2
+#define ADC_CHANNEL_CURRENT 3
 
 //initialize PGAs
 MCP3304 adc(19);   //atmega328 PC5
@@ -86,27 +85,21 @@ char overtemp()
                         digitalWrite(_pin_heater, LOW);
                         analogWrite(_pin_heater, 0);
                 }
+                hmi.Buzzer(true);
                 return true;
         }
-
-        return false;
+        else
+        {
+                hmi.Buzzer(false);
+                return false;
+        }
 }
 
 //periodic subroutine called every 1ms
 void timerIsr() {
-        static long unsigned int milliseconds = 0;
-
-        milliseconds++;
         encoder->service(); //execute encoder stuff
-        bool aaa = false;
-        aaa = !aaa;
-        //digitalWrite(A1, aaa);
-
-        if ((milliseconds % 500) == 0)
-        {
+        if ((millis() % 500) == 0)
                 overtemp();
-        }
-
 }
 
 void setup_screen(int);

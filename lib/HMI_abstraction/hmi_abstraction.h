@@ -16,7 +16,7 @@
 
 #define HMI_DEBUG //build debug functions
 
-#define LCD_LENGHT 21
+#define LCD_LENGHT 20
 #define LCD_HEIGHT  4
 
 #include "Arduino.h"
@@ -41,52 +41,55 @@ public:
 
         void Begin (void)
         {
-                //memset(_LCD_array, 0, (sizeof(_LCD_array)/sizeof(_LCD_array[0]))); //clear the array
-                Clean();
+
+                CleanAll(); //initialize array
 
                 //lcd init code
                 _lcd_unabstracted.begin(LCD_LENGHT, LCD_HEIGHT);
                 _lcd_unabstracted.setCursor(0, 0);
                 _lcd_unabstracted.noCursor();
 
-
+                //buzzer
                 pinMode(A1, OUTPUT);
                 digitalWrite(A1, LOW);
 
         }
 
-        void RowClean(int col_start,int col_end,int row)
+        void Clean(int col_start, int col_end, int row)
         {
                 for(int i=col_start; i<col_end; i++) {
                         _LCD_array[i][row][1]=' ';
                 }
         }
-        void Clean ()
-        {
-                const char emptystring[21] = "                    ";
-                WriteString(0,0, (char*) emptystring);
-                WriteString(0,1, (char*) emptystring);
-                WriteString(0,2, (char*) emptystring);
-                WriteString(0,3, (char*) emptystring);
-                _lcd_unabstracted.clear();
 
-        }
-
-        void ForceRewrite ()
+        //clean all rows, but does not force rewrite or hard clear the lcd
+        void CleanAll ()
         {
-                /*
-                //_lcd_unabstracted.clear();
-                for (char row=0; row!=LCD_HEIGHT; row++)
+                for (char row = 0; row != LCD_HEIGHT; row++)
                 {
-                        char temp[21];
-                        GetLine (row, temp, 1);
-                        _lcd_unabstracted.setCursor(0, row);
-                        _lcd_unabstracted.print(temp);
+                        for (char column=0; column != LCD_LENGHT; column++)
+                        {
+                                _LCD_array[column][row][1] = ' ';
+                        }
 
                 }
-                */
         }
 
+        //forcely clear the lcd and rewrite all chars
+        void ForceRewrite ()
+        {
+                for (char row = 0; row != LCD_HEIGHT; row++)
+                {
+                        for (char column=0; column != LCD_LENGHT; column++)
+                        {
+                                _LCD_array[column][row][0] = ' ';
+                        }
+
+                }
+                _lcd_unabstracted.clear();
+                Update();
+
+        }
 
         void Buzzer(bool on)
         {
@@ -94,7 +97,6 @@ public:
                         tone(A1, 1254);
                 else
                         noTone(A1);
-
         }
 
 
@@ -110,7 +112,6 @@ public:
         //custom bootscreen for LCD
         void SplashScreen(char* sample_type)
         {
-                //the boot bypass our interface
                 _lcd_unabstracted.setCursor(0, 0);
                 _lcd_unabstracted.print(F("    Hall  Effect    "));
                 _lcd_unabstracted.setCursor(0, 1);
@@ -127,15 +128,12 @@ public:
         void WriteString(char column, char row, char *src)
         {
                 char lenght = strlen(src);
-                for (char i=0; ( i != lenght && i != LCD_LENGHT); i++)
+                for (char i=0; ( i != lenght && ((i+column) != LCD_LENGHT)); i++)
                 {
                         _LCD_array[column+i][row][1] = src[i];
                 }
-
-
         }
 
-        #ifdef HMI_DEBUG
         void GetLine (unsigned char _line, char* _dest_array, bool _third_parameter)
         {
 
@@ -147,23 +145,7 @@ public:
                 _dest_array[21] = 0;
         }
 
-
-        #endif
-
-private:
-        char _LCD_array[LCD_LENGHT][LCD_HEIGHT][2]; //[][][0] is written, [][][1] to be written
-
-
-        // clear X characters starting from a position
-        void ClearPos (char startcolumn, char startrow, char lenght)
-        {
-                for (int i=0; (i!= lenght && i != (LCD_LENGHT - startcolumn )); i++)
-                {
-                        _LCD_array[startcolumn+i][startrow][1] = ' ';
-                }
-        }
-public:
-        //update from MCU memory to LCD
+        //update from MCU memory to LCD the chars that are different
         void Update (void)
         {
                 for (char column=0; column != LCD_LENGHT; column++)
@@ -172,7 +154,6 @@ public:
                         {
                                 if(_LCD_array[column][row][1] != _LCD_array[column][row][0] )                 //if new value if different from old
                                 {
-                                        //lcd set cursor at column, row
                                         _lcd_unabstracted.setCursor(column, row);
                                         _lcd_unabstracted.write(_LCD_array[column][row][1]);
                                         _LCD_array[column][row][0] = _LCD_array[column][row][1];
@@ -180,6 +161,9 @@ public:
                         }
                 }
         }
+
+private:
+              char _LCD_array[LCD_LENGHT][LCD_HEIGHT][2]; //[][][0] is written, [][][1] to be written
 
 };
 

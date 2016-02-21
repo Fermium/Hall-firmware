@@ -180,7 +180,7 @@ char mode_3(int increment)
         unsigned int integer_part = trunc(resistance);
         unsigned int floating_part = ((resistance - integer_part)* pow(10,dec_prec) );
 
-        //create the format string for the next sprintf with the right number of decimals
+        //generate format for the next sprintf,example %d.%02d using the calculated number of decimals
         char format[10];
         sprintf_P(format,PSTR("%%d%c%%0%dd"), (dec_prec != 0) ? '.' : ' ', dec_prec);
 
@@ -290,6 +290,8 @@ char mode_7(int increment)
         unsigned int floating_part=((voltage  - integer_part) * pow(10,dec_prec));
         char lcd_string[9];
         char format[10];
+
+        //generate format for the next sprintf, example %d.%02d using the calculated number of decimals
         sprintf_P(format,PSTR("%%d%c%%0%dd"),(dec_prec != 0) ? '.' : ' ',(int)dec_prec);
         sprintf(lcd_string, format, integer_part, (abs(floating_part)));
         hmi.Clean(0,9,3);

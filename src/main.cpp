@@ -65,6 +65,9 @@ const PROGMEM unsigned int ADC_RESOLUTION            = 4096;
 HMI_abstraction hmi; //hmi is a wrapper around the LCD library
 ClickEncoder *encoder;
 
+//global variables:
+char temp_string_10chars[10];
+
 //check and shutdown if temperature is overlimit
 //return false if temperature is ok, true if is overlimit
 //####### DO NOT TOUCH ! YOU RISK DAMAGING THE INSTRUMENT ! #######
@@ -147,10 +150,9 @@ char mode_1(int increment)
         unsigned int integer_part = trunc(current);
         unsigned int floating_part = ((current - integer_part)*100);
 
-        char lcd_string[9];
-        sprintf_P(lcd_string, PSTR("%d.%02d"), integer_part, floating_part);
+        sprintf_P(temp_string_10chars, PSTR("%d.%02d"), integer_part, floating_part);
         hmi.Clean(0,9,0);
-        hmi.WriteString(0, 0, lcd_string);
+        hmi.WriteString(0, 0, temp_string_10chars);
         hmi.WriteString(7,0,"mA");
 
         return 2; //jump to next mode
@@ -184,10 +186,9 @@ char mode_3(int increment)
         sprintf_P(format,PSTR("%%d%c%%0%dd"), (dec_prec != 0) ? '.' : ' ', dec_prec);
 
         //write to the lcd
-        char lcd_string[9];
-        sprintf(lcd_string, format, integer_part, floating_part);
+        sprintf(temp_string_10chars, format, integer_part, floating_part);
         hmi.Clean(0,9,1);
-        hmi.WriteString (0,1, lcd_string);
+        hmi.WriteString (0,1, temp_string_10chars);
 
         //write the OMEGA character
         char ohm[2];
@@ -213,10 +214,9 @@ char mode_4(int increment)
         unsigned int gain_floating_part = ((gain - gain_integer_part) * 10);
 
 
-        char lcd_string[9];
-        sprintf_P(lcd_string, PSTR("%3d.%1d x"), gain_integer_part, gain_floating_part  );
+        sprintf_P(temp_string_10chars, PSTR("%3d.%1d x"), gain_integer_part, gain_floating_part  );
         hmi.Clean(11,20,1);
-        hmi.WriteString(11,1, lcd_string);
+        hmi.WriteString(11,1, temp_string_10chars);
         return 4;
 }
 //hall: temperature selected, update LCD
@@ -248,9 +248,9 @@ char mode_5(int increment)
         unsigned int integer_part = trunc(temperature);
         unsigned int floating_part = ((temperature - integer_part) * 100);
 
-        sprintf_P(temp_string_global_10chars, PSTR("%3d.%01d"), integer_part, abs(floating_part));
+        sprintf_P(temp_string_10chars, PSTR("%3d.%01d"), integer_part, abs(floating_part));
         hmi.Clean(0,9,2);
-        hmi.WriteString(0,2, temp_string_global_10chars);
+        hmi.WriteString(0,2, temp_string_10chars);
         char celsius[3];
         sprintf_P(celsius,PSTR("%c%c"),0b11011111, unit[index]);
         hmi.WriteString(7,2,celsius);
@@ -268,22 +268,21 @@ char mode_6(int increment)
         float voltage = (( CAL_VOLTAGE_REFERENCE * adc.read(ADC_CHANNEL_TEMP) ) / ADC_RESOLUTION );
         float temperature = (voltage - CAL_TEMPERATURE_ZERO_VOLT) /  CAL_TEMPERATURE_VOLTAGE_GAIN;
 
-        char lcd_string[9];
         if (overtemp()) //EMERGENCY
         {
                 power_percentage = 0;
-                sprintf_P(lcd_string, PSTR("!! ERR !!"));
+                sprintf_P(temp_string_10chars, PSTR("!! ERR !!"));
         }
         else
         {
-                sprintf_P(lcd_string, PSTR("Pwr :%3d%%"), power_percentage);
+                sprintf_P(temp_string_10chars, PSTR("Pwr :%3d%%"), power_percentage);
         }
 
         char power_255 = constrain( (power_percentage * 2.55 ), 0, 255);
 
         analogWrite(PIN_HEATER, power_255);
         hmi.Clean(11,20,2);
-        hmi.WriteString(11,2, lcd_string);
+        hmi.WriteString(11,2, temp_string_10chars);
         return 6;
 }
 //hall: hall voltage selected, update LCD
@@ -301,14 +300,12 @@ char mode_7(int increment)
 
         unsigned int integer_part = trunc(voltage );
         unsigned int floating_part= ((voltage  - integer_part) * pow(10,dec_prec));
-        char lcd_string[9];
         char format[10];
-
         //generate format for the next sprintf, example %d.%02d using the calculated number of decimals
         sprintf_P(format,PSTR("%%d%c%%0%dd"),(dec_prec != 0) ? '.' : ' ', dec_prec);
-        sprintf(lcd_string, format, integer_part, (abs(floating_part)));
+        sprintf(temp_string_10chars, format, integer_part, (abs(floating_part)));
         hmi.Clean(0,9,3);
-        hmi.WriteString(0,3, lcd_string);
+        hmi.WriteString(0,3, temp_string_10chars);
         hmi.WriteString(7,3,"mV");
 
         return 8;
@@ -329,11 +326,10 @@ char mode_8(int increment)
         unsigned int gain_integer_part = trunc(gain);
         unsigned int gain_floating_part = ((gain - gain_integer_part) * 10);
 
-        char lcd_string[9];
-        sprintf_P(lcd_string, PSTR("%3d.%d x"), gain_integer_part, gain_floating_part  );
+        sprintf_P(temp_string_10chars, PSTR("%3d.%d x"), gain_integer_part, gain_floating_part  );
 
         hmi.Clean(11,20,3);
-        hmi.WriteString(11,3, lcd_string);
+        hmi.WriteString(11,3, temp_string_10chars);
 
         return 8;
 }
@@ -436,7 +432,6 @@ void setup_screen(char selection){
                 hmi.WriteString(CENTER_LEFT,i,"||");
         }
 
-        char temp[2];
         if(selection==0) {
                 mode_1(0);
                 mode_2(0);
@@ -449,12 +444,12 @@ void setup_screen(char selection){
         }
         else{
                 if(selection%2!=0) {
-                        sprintf_P(temp, PSTR("%c"), 0b01111111);
-                        hmi.WriteString(CENTER_LEFT, selection/2,temp);
+                        sprintf_P(temp_string_10chars, PSTR("%c"), 0b01111111);
+                        hmi.WriteString(CENTER_LEFT, selection/2,temp_string_10chars);
                 }
                 else{
-                        sprintf_P(temp, PSTR("%c"), 0b01111110);
-                        hmi.WriteString(CENTER_RIGHT, (selection-1)/2,temp);
+                        sprintf_P(temp_string_10chars, PSTR("%c"), 0b01111110);
+                        hmi.WriteString(CENTER_RIGHT, (selection-1)/2,temp_string_10chars);
                 }
         }
 }

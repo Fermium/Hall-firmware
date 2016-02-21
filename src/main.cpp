@@ -130,6 +130,7 @@ char mode_2(int increment)
 //format:
 char mode_3(int increment)
 {
+
         // [needed] fix adc channels
         float current = ((( CAL_VOLTAGE_REFERENCE * adc.read(ADC_CHANNEL_CURRENT) ) / ADC_RESOLUTION ) / CAL_SHUNT_RESISTOR );
         float voltage = (( CAL_VOLTAGE_REFERENCE * adc.read(ADC_CHANNEL_VR) ) / ADC_RESOLUTION );
@@ -162,6 +163,8 @@ char mode_3(int increment)
 //format:
 char mode_4(int increment)
 {
+        increment /= 2; //slow it down
+
         static int index = 0;
         index = constrain( (index + increment), 0, 7);
 
@@ -179,11 +182,13 @@ char mode_4(int increment)
         hmi.WriteString(11,1, temp_string_10chars);
         return 4;
 }
-//hall: temperature selected, update LCD
+//hall: temperature selected, update LCD and change the unit
 //rdt:
 //format:
 char mode_5(int increment)
 {
+        increment /= 2; //slow it down
+
         static int index = 0; //0 is °c, 1 is °K, 2 is °F
         index = constrain( (index + increment), 0, 2);
         char unit[3] = { 'C', 'K', 'F' };
@@ -275,6 +280,7 @@ char mode_7(int increment)
 //format:
 char mode_8(int increment)
 {
+        increment /= 2; //slow it down
         static int index = 0;
         index = constrain( (index + increment), 0, 7);
 

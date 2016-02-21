@@ -224,24 +224,38 @@ char mode_4(int increment)
 //format:
 char mode_5(int increment)
 {
-        float voltage;
-        float temperature;
+        static int index = 0; //0 is °c, 1 is °K, 2 is °F
+        index = constrain( (index + increment), 0, 2);
+        char unit[3] = { 'C', 'K', 'F' };
 
-        voltage = (( CAL_VOLTAGE_REFERENCE * adc.read(ADC_CHANNEL_TEMP) ) / ADC_RESOLUTION );
-        temperature = (voltage - CAL_TEMPERATURE_ZERO_VOLT) /  CAL_TEMPERATURE_VOLTAGE_GAIN;
+        float voltage = (( CAL_VOLTAGE_REFERENCE * adc.read(ADC_CHANNEL_TEMP) ) / ADC_RESOLUTION );
+        float temperature_c = (voltage - CAL_TEMPERATURE_ZERO_VOLT) /  CAL_TEMPERATURE_VOLTAGE_GAIN;
+
+        float temperature; //converted temperature
+        switch (index)
+        {
+        case 0: //Celsius
+                //everything is ok!
+                break;
+        case 1: //Kelvin
+                temperature = temperature_c + 273.15 ;
+                break;
+        case 2: //Farenheit
+                temperature = (temperature_c * 1.8 + 32.0);
+                break;
+        }
 
         unsigned int integer_part = trunc(temperature);
         unsigned int floating_part = ((temperature - integer_part) * 100);
 
-        char lcd_string[9];
-        sprintf_P(lcd_string, PSTR("%3d.%01d"), integer_part, abs(floating_part));
+        sprintf_P(temp_string_global_10chars, PSTR("%3d.%01d"), integer_part, abs(floating_part));
         hmi.Clean(0,9,2);
-        hmi.WriteString(0,2, lcd_string);
+        hmi.WriteString(0,2, temp_string_global_10chars);
         char celsius[3];
-        sprintf_P(celsius,PSTR("%cC"),0b11011111);
+        sprintf_P(celsius,PSTR("%c%c"),0b11011111, unit[index]);
         hmi.WriteString(7,2,celsius);
 
-        return 6; //jump to the next mode
+        return 5;
 }
 //hall: heating element power selected, update it and LCD
 //rdt:

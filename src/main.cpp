@@ -309,8 +309,14 @@ char mode_8(int increment)
         if (increment != 0)
                 pga_vh.Set((char) index, 0);
 
+        //calculate gain for display, in the format 999.9
+        float gain = pga_vh.GetSetGain() * CAL_FIXED_GAIN_VHALL;
+        unsigned int gain_integer_part = trunc(gain);
+        unsigned int gain_floating_part = ((gain - gain_integer_part) * 10);
+
         char lcd_string[9];
-        sprintf_P(lcd_string, PSTR("Vh G:%3dx"), pga_vh.GetSetGain() );
+        sprintf_P(lcd_string, PSTR("%3d.%1d x"), gain_integer_part, gain_floating_part  );
+
         hmi.Clean(11,20,3);
         hmi.WriteString(11,3, lcd_string);
 

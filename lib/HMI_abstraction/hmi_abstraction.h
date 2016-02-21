@@ -14,10 +14,6 @@
 #ifndef HMI_abstraction_h
 #define HMI_abstraction_h
 
-//Screen position define for easier usage
-#define CENTER_LEFT 9
-#define CENTER_RIGHT 10
-
 #define HMI_DEBUG //build debug functions
 
 #define LCD_LENGHT 20

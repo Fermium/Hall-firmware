@@ -41,7 +41,6 @@ public:
 
         void Begin (void)
         {
-
                 CleanAll(); //initialize array
 
                 //lcd init code
@@ -52,7 +51,6 @@ public:
                 //buzzer
                 pinMode(A1, OUTPUT);
                 digitalWrite(A1, LOW);
-
         }
 
         void Clean(int col_start, int col_end, int row)

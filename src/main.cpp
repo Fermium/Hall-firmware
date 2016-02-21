@@ -6,7 +6,11 @@
 #include <TimerOne.h>         // [needed] change with something that is not CC-BY
 #include <LiquidCrystal.h>
 #include <avr/pgmspace.h>
-#include <calibration.h>
+
+#include <calibration_hall.h>
+//#include <calibration_rdt.h>
+
+
 
 //please use the tag  [needed] for code that need to be fixed
 // [needed] move encoder inside hmi

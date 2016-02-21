@@ -208,8 +208,14 @@ char mode_4(int increment)
         if (increment != 0)
                 pga_vr.Set(char (index), 0);
 
+        //calculate gain for display, in the format 999.9
+        float gain = pga_vr.GetSetGain() * CAL_FIXED_GAIN_VRES;
+        unsigned int gain_integer_part = trunc(gain);
+        unsigned int gain_floating_part = ((gain - gain_integer_part) * 10);
+
+
         char lcd_string[9];
-        sprintf_P(lcd_string, PSTR("Vr G:%3dx"), pga_vr.GetSetGain() );
+        sprintf_P(lcd_string, PSTR("%3d.%1d x"), gain_integer_part, gain_floating_part  );
         hmi.Clean(11,20,1);
         hmi.WriteString(11,1, lcd_string);
         return 4;

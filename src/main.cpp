@@ -429,7 +429,7 @@ void loop()
 void setup_screen(char selection){
         unsigned char i=0;
         for(i; i<4; i++) {
-                hmi.WriteString(CENTER_LEFT,i,"||");
+                hmi.WriteString((hmi.GetLenght() / 2) - 1,i,"||");
         }
 
         if(selection==0) {
@@ -444,12 +444,12 @@ void setup_screen(char selection){
         }
         else{
                 if(selection%2!=0) {
-                        sprintf_P(temp_string_10chars, PSTR("%c"), 0b01111111);
-                        hmi.WriteString(CENTER_LEFT, selection/2,temp_string_10chars);
+                        sprintf_P(temp_string_10chars, PSTR("%c"), 0b01111111); //left arrow
+                        hmi.WriteString((hmi.GetLenght() / 2) - 1, selection/2,temp_string_10chars);
                 }
                 else{
-                        sprintf_P(temp_string_10chars, PSTR("%c"), 0b01111110);
-                        hmi.WriteString(CENTER_RIGHT, (selection-1)/2,temp_string_10chars);
+                        sprintf_P(temp_string_10chars, PSTR("%c"), 0b01111110); //right arrow
+                        hmi.WriteString((hmi.GetLenght() / 2), (selection-1)/2,temp_string_10chars);
                 }
         }
 }

@@ -14,6 +14,10 @@
 #ifndef HMI_abstraction_h
 #define HMI_abstraction_h
 
+//Screen position define for easier usage
+#define CENTER_LEFT 9
+#define CENTER_RIGHT 10
+
 #define HMI_DEBUG //build debug functions
 
 #define LCD_LENGHT 20
@@ -141,6 +145,15 @@ public:
                         _dest_array[i] = _LCD_array[i][_line][_third_parameter];
                 }
                 _dest_array[21] = 0;
+        }
+
+        char GetHeight()
+        {
+          return LCD_HEIGHT;
+        }
+        char GetLenght()
+        {
+          return LCD_LENGHT;
         }
 
         //update from MCU memory to LCD the chars that are different

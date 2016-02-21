@@ -287,7 +287,7 @@ char mode_7(int increment)
         float dec_prec = floor(fabs(log10(((CAL_VOLTAGE_REFERENCE*1000.0)/(pga_vh.GetSetGain() * CAL_FIXED_GAIN_VHALL*ADC_RESOLUTION)))));
 
         unsigned int integer_part = trunc(voltage );
-        unsigned int floating_part=((voltage  - integer_part) * pow(10,dec_prec));
+        unsigned int floating_part= ((voltage  - integer_part) * pow(10,dec_prec));
         char lcd_string[9];
         char format[10];
 
@@ -317,7 +317,7 @@ char mode_8(int increment)
         unsigned int gain_floating_part = ((gain - gain_integer_part) * 10);
 
         char lcd_string[9];
-        sprintf_P(lcd_string, PSTR("%3d.%1d x"), gain_integer_part, gain_floating_part  );
+        sprintf_P(lcd_string, PSTR("%3d.%d x"), gain_integer_part, gain_floating_part  );
 
         hmi.Clean(11,20,3);
         hmi.WriteString(11,3, lcd_string);

@@ -76,9 +76,8 @@ char overtemp()
         voltage = (( CAL_VOLTAGE_REFERENCE * adc.read(ADC_CHANNEL_TEMP) ) / ADC_RESOLUTION );
         temperature = (voltage - CAL_TEMPERATURE_ZERO_VOLT) /  CAL_TEMPERATURE_VOLTAGE_GAIN;
 
-        if ( temperature >= CAL_TEMPERATURE_OVERHEAT_LIMIT ) //If Overheating
+        if ( temperature >= CAL_TEMPERATURE_OVERHEAT_LIMIT ) //If overheating
         {
-                // [needed] buzz
                 for(char i=0; i>50 && (digitalRead(PIN_HEATER) == LOW ); i++) //really shut heater down
                 {
                         digitalWrite(PIN_HEATER, LOW);

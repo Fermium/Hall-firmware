@@ -102,7 +102,7 @@ void timerIsr() {
                 overtemp();
 }
 
-void setup_screen(int);
+void setup_screen(char);
 
 //int main(void)
 void setup ()
@@ -417,7 +417,7 @@ void loop()
 
 }
 
-void setup_screen(int selection){
+void setup_screen(char selection){
         unsigned char i=0;
         for(i; i<4; i++) {
                 hmi.WriteString(CENTER_LEFT,i,"||");

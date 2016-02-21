@@ -232,7 +232,7 @@ char mode_5(int increment)
         temperature = (voltage - CAL_TEMPERATURE_ZERO_VOLT) /  CAL_TEMPERATURE_VOLTAGE_GAIN;
 
         unsigned int integer_part = trunc(temperature);
-        unsigned int floating_part = ((temperature - integer_part)*100);
+        unsigned int floating_part = ((temperature - integer_part) * 100);
 
         char lcd_string[9];
         sprintf_P(lcd_string, PSTR("%3d.%01d"), integer_part, abs(floating_part));

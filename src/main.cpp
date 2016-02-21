@@ -238,7 +238,7 @@ char mode_5(int increment)
                 //everything is ok!
                 break;
         case 1: //Kelvin
-                temperature = temperature_c + 273.15 ;
+                temperature = temperature_c + 273.15;
                 break;
         case 2: //Farenheit
                 temperature = (temperature_c * 1.8 + 32.0);

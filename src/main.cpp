@@ -284,7 +284,7 @@ char mode_7(int increment)
         voltage -= CAL_HALL_ZERO_VOLTAGE;   //voltage output relative to 2.5V ground
         voltage /= pga_vh.GetSetGain() * CAL_FIXED_GAIN_VHALL;     //compensate for PGA and OPAMP gain
 
-        float dec_prec = floor(fabs(log10(((CAL_VOLTAGE_REFERENCE*1000.0)/(pga_vh.GetSetGain() * CAL_FIXED_GAIN_VHALL*ADC_RESOLUTION)))));
+        int dec_prec = floor(fabs(log10(((CAL_VOLTAGE_REFERENCE*1000.0)/(pga_vh.GetSetGain() * CAL_FIXED_GAIN_VHALL*ADC_RESOLUTION)))));
 
         unsigned int integer_part = trunc(voltage );
         unsigned int floating_part= ((voltage  - integer_part) * pow(10,dec_prec));
@@ -292,7 +292,7 @@ char mode_7(int increment)
         char format[10];
 
         //generate format for the next sprintf, example %d.%02d using the calculated number of decimals
-        sprintf_P(format,PSTR("%%d%c%%0%dd"),(dec_prec != 0) ? '.' : ' ',(int)dec_prec);
+        sprintf_P(format,PSTR("%%d%c%%0%dd"),(dec_prec != 0) ? '.' : ' ', dec_prec);
         sprintf(lcd_string, format, integer_part, (abs(floating_part)));
         hmi.Clean(0,9,3);
         hmi.WriteString(0,3, lcd_string);

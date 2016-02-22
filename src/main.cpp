@@ -3,17 +3,14 @@
 #include <hmi_abstraction.h>
 #include <ClickEncoder.h>
 #include <math.h>
-#include <TimerOne.h>         // [needed] change with something that is not CC-BY
+#include <TimerOne.h>         // TODO: change with something that is not CC-BY
 #include <LiquidCrystal.h>
 #include <avr/pgmspace.h>
 
 #include <calibration_hall.h>
 //#include <calibration_rdt.h>
 
-
-
-//please use the tag  [needed] for code that need to be fixed
-// [needed] move encoder inside hmi
+// TODO: move encoder inside hmi
 
 /* DISPLAY FORMAT
    12.34  mA||Fermium
@@ -135,7 +132,7 @@ char mode_2(int increment)
 char mode_3(int increment)
 {
 
-        // [needed] fix adc channels
+        // TODO: fix adc channels
         float current = ((( CAL_VOLTAGE_REFERENCE * adc.read(ADC_CHANNEL_CURRENT) ) / ADC_RESOLUTION ) / CAL_SHUNT_RESISTOR );
         float voltage = (( CAL_VOLTAGE_REFERENCE * adc.read(ADC_CHANNEL_VR) ) / ADC_RESOLUTION );
         voltage /= pga_vr.GetSetGain() * CAL_FIXED_GAIN_VRES; //compensate for PGA and OPAMP gain

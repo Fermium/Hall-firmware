@@ -76,7 +76,7 @@ public:
         //forcely clear the lcd and rewrite all chars
         void ForceRewrite ()
         {
-                for (char row = 0; row != LCD_HEIGHT; row++)
+                /*for (char row = 0; row != LCD_HEIGHT; row++)
                 {
                         for (char column=0; column != LCD_LENGHT; column++)
                         {
@@ -85,7 +85,7 @@ public:
 
                 }
                 _lcd_unabstracted.clear();
-                Update();
+                Update();*/
 
         }
 
@@ -108,7 +108,7 @@ public:
 
 
         //custom bootscreen for LCD
-        void SplashScreen(char* sample_type)
+        void SplashScreen(void )
         {
                 _lcd_unabstracted.setCursor(0, 0);
                 _lcd_unabstracted.print(F("    Hall  Effect    "));
@@ -118,7 +118,7 @@ public:
                 _lcd_unabstracted.print(F("web: fermiumlabs.com"));
                 _lcd_unabstracted.setCursor(0, 3);
                 _lcd_unabstracted.print(F("Sample:   "));
-                _lcd_unabstracted.print(sample_type);
+                _lcd_unabstracted.print(F(SAMPLE_TYPE));
                 _lcd_unabstracted.print(F("-doped"));
         }
 

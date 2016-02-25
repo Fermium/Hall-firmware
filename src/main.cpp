@@ -302,7 +302,7 @@ char mode_7(int increment)
         unsigned int integer_part;
         integer_part = trunc(voltage );
         unsigned int floating_part;
-        floating_part= ((voltage  - integer_part) * pow(10, dec_prec));
+        floating_part= abs((voltage  - integer_part) * pow(10, dec_prec));
 
         char format[10];
         //generate format for the next sprintf, example %d.%02d using the calculated number of decimals

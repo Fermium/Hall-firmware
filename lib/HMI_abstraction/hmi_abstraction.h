@@ -92,7 +92,7 @@ public:
         void Buzzer(bool on)
         {
                 if(on)
-                        tone(A1, 1254);
+                        tone(A1, 1000);
                 else
                         noTone(A1);
         }

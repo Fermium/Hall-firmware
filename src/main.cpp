@@ -44,11 +44,9 @@ void debug(char*);
 //####### DO NOT TOUCH ! YOU RISK DAMAGING THE INSTRUMENT ! #######
 char overtemp()
 {
-
         float voltage;
         float temperature;
         voltage = (( CAL_VOLTAGE_REFERENCE * adc.read(ADC_CHANNEL_TEMP) ) / ADC_RESOLUTION );
-        voltage = 2.0;
         temperature = (voltage - CAL_TEMPERATURE_ZERO_VOLT) /  CAL_TEMPERATURE_VOLTAGE_GAIN;
         if ( temperature >= CAL_TEMPERATURE_OVERHEAT_LIMIT ) //If overheating
         {
@@ -56,6 +54,7 @@ char overtemp()
 
                 digitalWrite(PIN_HEATER, LOW);
                 analogWrite(PIN_HEATER, 0);
+
                 return true;
         }
         else
@@ -68,14 +67,7 @@ char overtemp()
 //periodic ISR called every 1ms
 //has to be kept very fast and non-blocking
 void timerIsr() {
-        static unsigned long count=0;
         encoder->service(); //execute encoder stuff
-        if ((count % 500) == 0) {
-                overtemp();
-
-        }
-        count++;
-
 }
 
 void setup_screen(char);
@@ -398,7 +390,8 @@ void loop()
         //number of rotations of the encoder
         encoder_notches = -encoder->getValue();
 
-        setup_screen(mode);
+        setup_screen(mode); //draw center symbols of the select mode
+
         //call the mode subroutine, pass the rotation of the encoder
         switch (mode)
         {
@@ -433,10 +426,16 @@ void loop()
         case 0:
         default:
                 mode = 0;         //Just initialize screen and wait
-                //hmi.Update();
                 break;
         }
 
+        //check for overtemperature
+        if ( (cycles % 1000L) == 0  )
+        {
+                overtemp();
+        }
+
+        //update LCD
         if ( (cycles % 2500L) == 0  )
         {
                 //every now and then just update the display
@@ -450,15 +449,10 @@ void loop()
                 mode_7(0);
                 mode_8(0);
                 hmi.Update();
-
-                //clear display every few minutes
-                if (cycles % 60000L == 0);
-                //hmi.ForceRewrite();
         }
 
         encoder_notches = 0;
-        cycles ++;
-
+        cycles++;
 }
 
 void setup_screen(char selection){
@@ -469,19 +463,8 @@ void setup_screen(char selection){
                 hmi.WriteString((hmi.GetLenght() / 2) - 1,i,tmp);
         }
 
-        if(selection==0) {
-           /*
-                mode_1(0);
-                mode_2(0);
-                mode_3(0);
-                mode_4(0);
-                mode_5(0);
-                mode_6(0);
-                mode_7(0);
-                mode_8(0);
-                */
-        }
-        else{
+        if(selection!=0) {
+
                 if(selection%2!=0) {
                         sprintf_P(temp_string_10chars, PSTR("%c"), 0b01111111); //left arrow
                         hmi.WriteString((hmi.GetLenght() / 2) - 1, selection/2,temp_string_10chars);

@@ -1,10 +1,10 @@
 #define APPARATUS_HALL
 
 //adc channel definitions definitions
-#define ADC_CHANNEL_VH      0
-#define ADC_CHANNEL_VR      1
-#define ADC_CHANNEL_TEMP    2
-#define ADC_CHANNEL_CURRENT 3
+#define ADC_CHANNEL_VH      4
+#define ADC_CHANNEL_VR      3
+#define ADC_CHANNEL_TEMP    0
+#define ADC_CHANNEL_CURRENT 1
 
 
 

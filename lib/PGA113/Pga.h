@@ -57,6 +57,7 @@ public:
 //initialize the PGA given the pins
 PGA113(char _p)
 {
+      /*
         _pin = _p;
 
         //set pin to output

@@ -68,9 +68,9 @@ PGA113(char _p)
 
         //initialize SPI library
         //SPI.begin();         //to be called
-
+        */
         //initialize PGAs with gain=1 and channel=0
-        Set(0,0);
+        Set(0);
 
         //initialize global variables
         //i'm to lazy to study a serious c++ solution
@@ -83,12 +83,12 @@ PGA113(char _p)
         _gains_available[6] = 100;
         _gains_available[7] = 200;
         _gain_set_index = 0; //index from the array above
-        _channel_set = 0;
+
 }
 
 //set the gain in index form
-void Set(unsigned char _G, unsigned char _Ch)
-{
+void Set(unsigned char _G)
+{  /*
         //take the SS pin low to select the chip:
         digitalWrite(_pin, LOW);
         //send in the address and value via SPI:
@@ -99,9 +99,8 @@ void Set(unsigned char _G, unsigned char _Ch)
 
         //take the SS pin high to de-select the chip:
         digitalWrite(_pin, HIGH);
-
+        */
         _gain_set_index = _G;
-        _channel_set = _Ch;
 
 }
 
@@ -126,13 +125,12 @@ char GetGain(char _i)
 //return the channel as an index as table at the start of this source code
 char GetChannel(void)
 {
-        return _channel_set;
+
 }
 
 private:
 unsigned char _gains_available[8];
 unsigned char _gain_set_index; //index of the array above
-unsigned char _channel_set;
 unsigned char _pin;
 
 };

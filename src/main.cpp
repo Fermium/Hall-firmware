@@ -47,16 +47,15 @@ char overtemp()
 
         float voltage;
         float temperature;
-        debug("here");
         voltage = (( CAL_VOLTAGE_REFERENCE * adc.read(ADC_CHANNEL_TEMP) ) / ADC_RESOLUTION );
+        voltage = 2.0;
         temperature = (voltage - CAL_TEMPERATURE_ZERO_VOLT) /  CAL_TEMPERATURE_VOLTAGE_GAIN;
-        debug("or here");
         if ( temperature >= CAL_TEMPERATURE_OVERHEAT_LIMIT ) //If overheating
         {
+                hmi.Buzzer(true);
 
                 digitalWrite(PIN_HEATER, LOW);
                 analogWrite(PIN_HEATER, 0);
-                hmi.Buzzer(true);
                 return true;
         }
         else
@@ -71,8 +70,8 @@ char overtemp()
 void timerIsr() {
         static unsigned long count=0;
         encoder->service(); //execute encoder stuff
-        if ((count % 500) == 0){
-           overtemp();
+        if ((count % 500) == 0) {
+                overtemp();
 
         }
         count++;
@@ -85,7 +84,6 @@ void setup_screen(char);
 void setup ()
 {
         hmi.Begin();
-
         //software SPI
         pinMode(11, OUTPUT); //MOSI
         pinMode(12, INPUT);  //MISO
@@ -119,9 +117,12 @@ void setup ()
 //format:
 char mode_1(int increment)
 {
+
         //calculate current (yes, Ohm's law)
         float current;
         current = ((( CAL_VOLTAGE_REFERENCE * adc.read(ADC_CHANNEL_CURRENT) ) / ADC_RESOLUTION ) / CAL_SHUNT_RESISTOR );
+        current *= 1000; //Show mA
+
 
         unsigned int integer_part;
         integer_part = trunc(current);
@@ -144,9 +145,10 @@ char mode_2(int increment)
         return 3; //jump to next mode
 }
 
+//write in a little empty place in the corner of the LCD
 void debug(char* debug_msg){
-   hmi.Clean(11,20,0);
-   hmi.WriteString(11,0,debug_msg);
+        hmi.Clean(11,20,0);
+        hmi.WriteString(11,0,debug_msg);
 }
 //hall: resistance selected, just update lcd
 //rdt:
@@ -173,12 +175,12 @@ char mode_3(int increment)
 
         //generate format for the next sprintf,example %d.%02d using the calculated number of decimals
         char format[10];
-        if(dec_prec!=0){
-           sprintf_P(format,PSTR("%%d.%%0%dd"), dec_prec);
-           sprintf(temp_string_10chars, format, integer_part, floating_part);
+        if(dec_prec!=0) {
+                sprintf_P(format,PSTR("%%d.%%0%dd"), dec_prec);
+                sprintf(temp_string_10chars, format, integer_part, floating_part);
         }
         else{
-           sprintf(temp_string_10chars, "%d", integer_part);
+                sprintf(temp_string_10chars, "%d", integer_part);
         }
 
         //write to the lcd
@@ -204,7 +206,7 @@ char mode_4(int increment)
         index = constrain( (index + increment), 0, 7);
 
         if (increment != 0)
-                pga_vr.Set(char (index), 0);
+                pga_vr.Set(char (index));
 
         //calculate gain for display, in the format 999.9
         float gain;
@@ -227,7 +229,7 @@ char mode_5(int increment)
 {
 
         static int index = 0; //0 is °c, 1 is °K, 2 is °F
-        index = (index+increment==-1)?2:(index + increment);
+        index = (index+increment==-1) ? 2 : (index + increment);
         char unit[3] = { 'C', 'K', 'F' };
 
         float voltage;
@@ -301,9 +303,17 @@ char mode_7(int increment)
 {
         float voltage;
 
-        voltage = (( CAL_VOLTAGE_REFERENCE * adc.read(ADC_CHANNEL_VH) ) / ADC_RESOLUTION ); //voltage in the adc input
-        voltage -= CAL_HALL_ZERO_VOLTAGE;   //voltage output relative to 2.5V ground
+        char teemp[10];
+        int tempreading;
+        tempreading = adc.read(ADC_CHANNEL_VH);
+
+
+
+        voltage = (( CAL_VOLTAGE_REFERENCE * (float)tempreading ) / ADC_RESOLUTION );//voltage in the adc input
+        voltage -= CAL_HALL_ZERO_VOLTAGE;
         voltage /= pga_vh.GetSetGain() * CAL_FIXED_GAIN_VHALL;     //compensate for PGA and OPAMP gain
+        voltage *= 1000; //show mV
+
 
         int dec_prec;
         dec_prec = floor(fabs(log10(((CAL_VOLTAGE_REFERENCE*1000.0)/(pga_vh.GetSetGain() * CAL_FIXED_GAIN_VHALL*ADC_RESOLUTION)))));
@@ -314,12 +324,12 @@ char mode_7(int increment)
         floating_part= ((voltage  - integer_part) * pow(10,dec_prec));
         char format[10];
         //generate format for the next sprintf, example %d.%02d using the calculated number of decimals
-        if(dec_prec!=0){
-           sprintf_P(format,PSTR("%%d.%%0%dd"), dec_prec);
-           sprintf(temp_string_10chars, format, integer_part, floating_part);
+        if(dec_prec!=0) {
+                sprintf_P(format,PSTR("%%d.%%0%dd"), dec_prec);
+                sprintf(temp_string_10chars, format, integer_part, floating_part);
         }
         else{
-           sprintf(temp_string_10chars, "%d", integer_part);
+                sprintf(temp_string_10chars, "%d", integer_part);
         }
         hmi.Clean(0,9,3);
         hmi.WriteString(0,3, temp_string_10chars);
@@ -336,7 +346,7 @@ char mode_8(int increment)
         index = constrain( (index + increment), 0, 7);
 
         if (increment != 0)
-                pga_vh.Set((char) index, 0);
+                pga_vh.Set((char) index);
 
         //calculate gain for display, in the format 999.9
         float gain;
@@ -360,6 +370,7 @@ void loop()
         static char mode = 0;
         int16_t encoder_notches = 0;
         static unsigned long int cycles = 0;         //cycles of loop since the apparatus has been powered
+
 
         //parse the button of the encoder user input
         ClickEncoder::Button b = encoder->getButton();         //b is button status
@@ -406,9 +417,11 @@ void loop()
                 break;
         case 5:
                 mode = mode_5(encoder_notches);
+                hmi.Update();
                 break;
         case 6:
                 mode = mode_6(encoder_notches);
+                hmi.Update();
                 break;
         case 7:
                 mode = mode_7(encoder_notches);
@@ -417,13 +430,14 @@ void loop()
                 mode = mode_8(encoder_notches);
                 hmi.Update();
                 break;
+        case 0:
         default:
                 mode = 0;         //Just initialize screen and wait
-                hmi.Update();
+                //hmi.Update();
                 break;
         }
 
-        if ( (cycles % 1000) == 0  )
+        if ( (cycles % 2500L) == 0  )
         {
                 //every now and then just update the display
                 //if no user interaction has occurred
@@ -439,10 +453,11 @@ void loop()
 
                 //clear display every few minutes
                 if (cycles % 60000L == 0);
-                        //hmi.ForceRewrite();
+                //hmi.ForceRewrite();
         }
 
         encoder_notches = 0;
+        cycles ++;
 
 }
 
@@ -455,6 +470,7 @@ void setup_screen(char selection){
         }
 
         if(selection==0) {
+           /*
                 mode_1(0);
                 mode_2(0);
                 mode_3(0);
@@ -463,6 +479,7 @@ void setup_screen(char selection){
                 mode_6(0);
                 mode_7(0);
                 mode_8(0);
+                */
         }
         else{
                 if(selection%2!=0) {

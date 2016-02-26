@@ -55,83 +55,85 @@ class PGA113 {
 public:
 
 //initialize the PGA given the pins
-PGA113(char _p)
-{
-      /*
-        _pin = _p;
+        PGA113(char _p)
+        {
+                _pin = _p;
 
-        //set pin to output
-        pinMode (_pin, OUTPUT);
+                //set pin to output
+                pinMode (_pin, OUTPUT);
+                pinMode (PGA_MOSI, OUTPUT);
+                pinMode (PGA_CLK, OUTPUT);
 
-        //take the SS pin high to de-select the chip:
-        digitalWrite(_pin, HIGH);
+                //take the SS pin high to de-select the chip:
+                digitalWrite(_pin, HIGH);
 
-        //initialize SPI library
-        //SPI.begin();         //to be called
-        */
-        //initialize PGAs with gain=1 and channel=0
-        Set(0);
+                //initialize SPI library
+                //SPI.begin();         //to be called
 
-        //initialize global variables
-        //i'm to lazy to study a serious c++ solution
-        _gains_available[0] = 1;
-        _gains_available[1] = 2;
-        _gains_available[2] = 5;
-        _gains_available[3] = 10;
-        _gains_available[4] = 20;
-        _gains_available[5] = 50;
-        _gains_available[6] = 100;
-        _gains_available[7] = 200;
-        _gain_set_index = 0; //index from the array above
+                //initialize PGAs with gain=1 and channel=0
+                Set(0);
 
-}
+                //initialize global variables
+                //i'm to lazy to study a serious c++ solution
+                _gains_available[0] = 1;
+                _gains_available[1] = 2;
+                _gains_available[2] = 5;
+                _gains_available[3] = 10;
+                _gains_available[4] = 20;
+                _gains_available[5] = 50;
+                _gains_available[6] = 100;
+                _gains_available[7] = 200;
+                _gain_set_index = 0; //index from the array above
+
+        }
 
 //set the gain in index form
-void Set(unsigned char _G)
-{  /*
-        //take the SS pin low to select the chip:
-        digitalWrite(_pin, LOW);
-        //send in the address and value via SPI:
-        //SPI.transfer(0b00101010);         //command "write"
-        //SPI.transfer((_G << 4) + _Ch);
-        shiftOut(PGA_MOSI, PGA_CLK, MSBFIRST, 0b00101010) ;
-        shiftOut(PGA_MOSI, PGA_CLK, MSBFIRST, ((_G << 4) + _Ch)) ;
+        void Set(unsigned char _G)
+        {
+                unsigned char _Ch = 1;
+                //take the SS pin low to select the chip:
+                digitalWrite(_pin, LOW);
+                //send in the address and value via SPI:
+                //SPI.transfer(0b00101010);         //command "write"
+                //SPI.transfer((_G << 4) + _Ch);
+                shiftOut(PGA_MOSI, PGA_CLK, MSBFIRST, 0b00101010);
+                shiftOut(PGA_MOSI, PGA_CLK, MSBFIRST, ((_G << 4) + _Ch));
 
-        //take the SS pin high to de-select the chip:
-        digitalWrite(_pin, HIGH);
-        */
-        _gain_set_index = _G;
+                //take the SS pin high to de-select the chip:
+                digitalWrite(_pin, HIGH);
 
-}
+                _gain_set_index = _G;
+
+        }
 
 //return the actual set  gain in numerical format
-unsigned char GetSetGain(void)
-{
-        return _gains_available[_gain_set_index];
-}
+        unsigned char GetSetGain(void)
+        {
+                return _gains_available[_gain_set_index];
+        }
 
 //return the actual index
-char GetSetIndex(void)
-{
-        return _gain_set_index;
-}
+        char GetSetIndex(void)
+        {
+                return _gain_set_index;
+        }
 
 //return the gain in numerical format
-char GetGain(char _i)
-{
-        return _gains_available[_i];
-}
+        char GetGain(char _i)
+        {
+                return _gains_available[_i];
+        }
 
 //return the channel as an index as table at the start of this source code
-char GetChannel(void)
-{
+        char GetChannel(void)
+        {
 
-}
+        }
 
 private:
-unsigned char _gains_available[8];
-unsigned char _gain_set_index; //index of the array above
-unsigned char _pin;
+        unsigned char _gains_available[8];
+        unsigned char _gain_set_index; //index of the array above
+        unsigned char _pin;
 
 };
 

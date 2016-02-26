@@ -32,6 +32,7 @@ void MCP3304::pulse(void)
 }
 
 int MCP3304::read(int channel) {
+
 	init();
 
 	int value=0;
@@ -77,8 +78,6 @@ int MCP3304::read(int channel) {
 	digitalWrite(ADC_CS, HIGH);
 	delayMicroseconds(10);
 	return value;
-
-
 }
 
 int MCP3304::getCSPin() {

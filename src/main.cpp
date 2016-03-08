@@ -1,6 +1,6 @@
 #include <calibration_hall.h>
 //#include <calibration_rdt.h>
-
+//TODO: verificare valore adc < 4050 per resistenza e Vhall
 #include <Pga.h>
 #include <MCP3304.h>
 #include <hmi_abstraction.h>
@@ -29,7 +29,6 @@ ClickEncoder *encoder;
 //global variables:
 char temp_string_10chars[10];
 void debug(char*);
-
 //check and shutdown if temperature is overlimit
 //return false if temperature is ok, true if is overlimit
 //####### DO NOT TOUCH ! YOU RISK DAMAGING THE INSTRUMENT ! #######
@@ -105,9 +104,14 @@ char mode_1(int increment)
         //calculate current (yes, Ohm's law)
         float current;
         current = ((( CAL_VOLTAGE_REFERENCE * adc.read(ADC_CHANNEL_CURRENT) ) / ADC_RESOLUTION ) / CAL_SHUNT_RESISTOR );
-
+        unsigned int adc_read;
+        adc_read=adc.read(ADC_CHANNEL_CURRENT);
         current *= 1000; //Current is now in mA, not Amps
-
+        if(adc_read>ADC_OVERLOAD_VALUE_LSB){
+           hmi.Clean(0,9,0);
+           hmi.WriteString(0,0,"Overload");
+           return 5;
+        }
         //split floating number into separated integer and floating part
         unsigned int integer_part;
         integer_part = trunc(current);
@@ -139,11 +143,11 @@ void debug(char* debug_msg){
 //format:
 char mode_3(int increment)
 {
-
         float voltage;
         voltage = (( CAL_VOLTAGE_REFERENCE * adc.read(ADC_CHANNEL_VR) ) / ADC_RESOLUTION );
         voltage /= pga_vr.GetSetGain() * CAL_FIXED_GAIN_VRES; //compensate for PGA and OPAMP gain
-
+        unsigned int adc_read;
+        adc_read=adc.read(ADC_CHANNEL_VR);
         float current;
         current = ((( CAL_VOLTAGE_REFERENCE * adc.read(ADC_CHANNEL_CURRENT) ) / ADC_RESOLUTION ) / CAL_SHUNT_RESISTOR );
 
@@ -153,7 +157,11 @@ char mode_3(int increment)
         //calculate the required number of decimal digits
         int dec_prec;
         dec_prec = floor( -log10( fabs( CAL_VOLTAGE_REFERENCE / ( 50 * CAL_FIXED_GAIN_VRES * pga_vr.GetSetGain() ))));
-
+        if(adc_read>ADC_OVERLOAD_VALUE_LSB){
+           hmi.Clean(0,9,1);
+           hmi.WriteString(0,1,"Overload");
+           return 4;
+        }
         //split floating number into separated integer and floating part
         unsigned int integer_part;
         integer_part = trunc(resistance);
@@ -190,7 +198,7 @@ char mode_4(int increment)
         index = constrain( (index + increment), 0, 7);
 
         //update PGA gain
-        if (increment != 0)
+        //if (increment != 0)
                 pga_vr.Set(char (index));
 
         //calculate gain for display, in the format 999.9
@@ -218,16 +226,23 @@ char mode_5(int increment)
         index = (index+increment==-1) ? 2 : (index + increment);
         char unit[3] = { 'C', 'K', 'F' };
 
+
+        int adc_read;
+        adc_read = adc.read(ADC_CHANNEL_TEMP);
+
+
         float voltage;
-        voltage = (( CAL_VOLTAGE_REFERENCE * adc.read(ADC_CHANNEL_TEMP) ) / ADC_RESOLUTION );
+        voltage = ((  CAL_VOLTAGE_REFERENCE *  adc_read) /  ADC_RESOLUTION );
+
         float temperature_c;
-        temperature_c = (voltage - CAL_TEMPERATURE_ZERO_VOLT) /  CAL_TEMPERATURE_VOLTAGE_GAIN;
+        temperature_c = ((voltage - CAL_TEMPERATURE_ZERO_VOLT) /  CAL_TEMPERATURE_VOLTAGE_GAIN );
 
         //convert temperature
         float temperature;
         switch (index%3) {
 
         case 0: //Celsius
+                temperature = temperature_c;
                 break;
         case 1: //Kelvin
                 temperature = temperature_c + 273.15;
@@ -237,11 +252,16 @@ char mode_5(int increment)
                 break;
         }
 
+        if(adc_read > ADC_OVERLOAD_VALUE_LSB){
+           hmi.Clean(0,9,2);
+           hmi.WriteString(0,2,"Overload");
+           return 5;
+        }
         //split floating number into separated integer and floating part
-        unsigned int integer_part;
-        integer_part = trunc(temperature);
-        unsigned int floating_part;
-        floating_part = ((temperature - integer_part) * 10);
+        int integer_part;
+        integer_part = temperature;
+        int floating_part;
+        floating_part =   abs((temperature - integer_part) * 10);
 
         sprintf_P(temp_string_10chars, PSTR("%d.%01d"), integer_part, abs(floating_part));
         hmi.Clean(0,9,2);
@@ -298,6 +318,11 @@ char mode_7(int increment)
         int dec_prec;
         dec_prec = floor(fabs(log10(((CAL_VOLTAGE_REFERENCE*1000.0)/(pga_vh.GetSetGain() * CAL_FIXED_GAIN_VHALL*ADC_RESOLUTION)))));
 
+        if(tempreading>ADC_OVERLOAD_VALUE_LSB){
+           hmi.Clean(0,9,3);
+           hmi.WriteString(0,3, "Overload");
+           return 8;
+        }
         //split floating number into separated integer and floating part
         unsigned int integer_part;
         integer_part = trunc(voltage );
@@ -325,12 +350,22 @@ char mode_7(int increment)
 //format:
 char mode_8(int increment)
 {
-        static int index = 0;
+        static bool firstStart = true;
+
+        static int index = 6;
         index = constrain( (index + increment), 0, 7);
 
         //Update PGA gain
-        if (increment != 0)
+        if (increment != 0 || firstStart)
+        {
                 pga_vh.Set((char) index);
+                pga_vh.Set((char) index);
+                pga_vh.Set((char) index);
+                pga_vh.Set((char) index);
+                pga_vh.Set((char) index);
+
+             }
+
 
         //calculate gain for display, in the format 999.9
         float gain;
@@ -346,7 +381,8 @@ char mode_8(int increment)
 
         hmi.Clean(11,20,3);
         hmi.WriteString(11,3, temp_string_10chars);
-
+        if(firstStart)
+         firstStart=false;
         return 8;
 }
 

@@ -107,10 +107,10 @@ char mode_1(int increment)
         unsigned int adc_read;
         adc_read=adc.read(ADC_CHANNEL_CURRENT);
         current *= 1000; //Current is now in mA, not Amps
-        if(adc_read>ADC_OVERLOAD_VALUE_LSB){
-           hmi.Clean(0,9,0);
-           hmi.WriteString(0,0,"Overload");
-           return 5;
+        if(adc_read>ADC_OVERLOAD_VALUE_LSB) {
+                hmi.Clean(0,9,0);
+                hmi.WriteString(0,0,"Overload");
+                return 5;
         }
         //split floating number into separated integer and floating part
         unsigned int integer_part;
@@ -157,10 +157,10 @@ char mode_3(int increment)
         //calculate the required number of decimal digits
         int dec_prec;
         dec_prec = floor( -log10( fabs( CAL_VOLTAGE_REFERENCE / ( 50 * CAL_FIXED_GAIN_VRES * pga_vr.GetSetGain() ))));
-        if(adc_read>ADC_OVERLOAD_VALUE_LSB){
-           hmi.Clean(0,9,1);
-           hmi.WriteString(0,1,"Overload");
-           return 4;
+        if(adc_read>ADC_OVERLOAD_VALUE_LSB) {
+                hmi.Clean(0,9,1);
+                hmi.WriteString(0,1,"Overload");
+                return 4;
         }
         //split floating number into separated integer and floating part
         unsigned int integer_part;
@@ -199,7 +199,7 @@ char mode_4(int increment)
 
         //update PGA gain
         //if (increment != 0)
-                pga_vr.Set(char (index));
+        pga_vr.Set(char (index));
 
         //calculate gain for display, in the format 999.9
         float gain;
@@ -252,10 +252,10 @@ char mode_5(int increment)
                 break;
         }
 
-        if(adc_read > ADC_OVERLOAD_VALUE_LSB){
-           hmi.Clean(0,9,2);
-           hmi.WriteString(0,2,"Overload");
-           return 5;
+        if(adc_read > ADC_OVERLOAD_VALUE_LSB) {
+                hmi.Clean(0,9,2);
+                hmi.WriteString(0,2,"Overload");
+                return 5;
         }
         //split floating number into separated integer and floating part
         int integer_part;
@@ -318,10 +318,10 @@ char mode_7(int increment)
         int dec_prec;
         dec_prec = floor(fabs(log10(((CAL_VOLTAGE_REFERENCE*1000.0)/(pga_vh.GetSetGain() * CAL_FIXED_GAIN_VHALL*ADC_RESOLUTION)))));
 
-        if(tempreading>ADC_OVERLOAD_VALUE_LSB){
-           hmi.Clean(0,9,3);
-           hmi.WriteString(0,3, "Overload");
-           return 8;
+        if(tempreading>ADC_OVERLOAD_VALUE_LSB) {
+                hmi.Clean(0,9,3);
+                hmi.WriteString(0,3, "Overload");
+                return 8;
         }
         //split floating number into separated integer and floating part
         unsigned int integer_part;
@@ -364,7 +364,7 @@ char mode_8(int increment)
                 pga_vh.Set((char) index);
                 pga_vh.Set((char) index);
 
-             }
+        }
 
 
         //calculate gain for display, in the format 999.9
@@ -382,7 +382,7 @@ char mode_8(int increment)
         hmi.Clean(11,20,3);
         hmi.WriteString(11,3, temp_string_10chars);
         if(firstStart)
-         firstStart=false;
+                firstStart=false;
         return 8;
 }
 

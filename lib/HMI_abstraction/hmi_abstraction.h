@@ -6,15 +6,20 @@
    Written by: Davide Bortolami
  */
 
-//12.34  mA||
-//1234.45 O||Vr G=200
-//-123.3 °c||P   100%
-//12.34   V||Vh G=200
+/*
+       LCD display format
 
+      12.34  mA||
+      1234.45 O||Vr G=200
+      -123.3 °c||P   100%
+      12.34   V||Vh G=200
+
+
+*/
 #ifndef HMI_abstraction_h
 #define HMI_abstraction_h
 
-#define HMI_DEBUG //build debug functions
+#define HMI_DEBUG //Build debug functions
 
 #define LCD_LENGHT 20
 #define LCD_HEIGHT  4
@@ -34,7 +39,8 @@ LiquidCrystal _lcd_unabstracted(2, A2, A3, 1, A4, 0);
    Pin 17 = Analog in 3
    Pin 18 = Analog in 4
    Pin 19 = Analog in 5
- */
+
+*/
 
 class HMI_abstraction {
 public:
@@ -65,28 +71,30 @@ public:
         {
                 for (char row = 0; row != LCD_HEIGHT; row++)
                 {
-                        for (char column=0; column != LCD_LENGHT; column++)
-                        {
-                                _LCD_array[column][row][1] = ' ';
-                        }
-
+                   /* for (char column=0; column != LCD_LENGHT; column++)
+                    {
+                            _LCD_array[column][row][1] = ' ';
+                    }*/
+                    Clean(0,LCD_LENGHT,row);
                 }
         }
 
         //forcely clear the lcd and rewrite all chars
         void ForceRewrite ()
         {
-                /*for (char row = 0; row != LCD_HEIGHT; row++)
+
+              /* POSSIBLE IMPLEMENTATION GOT TO BE CHECKED
+                 for (char column=0; column != LCD_LENGHT; column++)
                 {
-                        for (char column=0; column != LCD_LENGHT; column++)
+                        for (char row=0; row!=LCD_HEIGHT; row++)
                         {
-                                _LCD_array[column][row][0] = ' ';
+                          _LCD_array[column][row][1]=_LCD_array[column][row][0];
                         }
-
                 }
-                _lcd_unabstracted.clear();
-                Update();*/
+                CleanAll();
+                Update();
 
+              */
         }
 
         void Buzzer(bool on)
@@ -107,13 +115,23 @@ public:
         }
 
 
-        //custom bootscreen for LCD
+        // Custom bootscreen for LCD
+
+        /*
+
+         +----------------------+
+         |     Hall  Effect     |
+         |     Fermium LABS     |
+         | web: fermiumlabs.com |
+         | Sample:   Ge P-doped |
+         +----------------------+
+        */
         void SplashScreen(void )
         {
                 _lcd_unabstracted.setCursor(0, 0);
                 _lcd_unabstracted.print(F("    Hall  Effect    "));
                 _lcd_unabstracted.setCursor(0, 1);
-                _lcd_unabstracted.print(F("Fermium Laboratories"));
+                _lcd_unabstracted.print(F("    Fermium LABS    "));
                 _lcd_unabstracted.setCursor(0, 2);
                 _lcd_unabstracted.print(F("web: fermiumlabs.com"));
                 _lcd_unabstracted.setCursor(0, 3);

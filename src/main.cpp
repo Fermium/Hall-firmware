@@ -8,6 +8,7 @@
 #include <math.h>
 #include <TimerOne.h>         // TODO: change with something that is not CC-BY
 #include <LiquidCrystal.h>
+#include <K_Thermocouple_AD8435.h>
 #include <avr/pgmspace.h>
 
 //initialize PGAs
@@ -35,9 +36,11 @@ void debug(char*);
 char overTemp()
 {
         float voltage;
+        float voltage_t;
         float temperature;
         voltage = (( CAL_VOLTAGE_REFERENCE * adc.read(ADC_CHANNEL_TEMP) ) / ADC_RESOLUTION );
-        temperature = (voltage - CAL_TEMPERATURE_ZERO_VOLT) /  CAL_TEMPERATURE_VOLTAGE_GAIN;
+        voltage_t=thermocouple_voltage(voltage,CAL_TEMPERATURE_ZERO_VOLT);
+        temperature = lin_extrap_temp(voltage_t);
         if ( temperature >= CAL_TEMPERATURE_OVERHEAT_LIMIT ) { //If overheating
 
                 hmi.Buzzer(true);
@@ -232,10 +235,12 @@ char mode_5(int increment)
 
 
         float voltage;
-        voltage = ((  CAL_VOLTAGE_REFERENCE *  adc_read) /  ADC_RESOLUTION );
-
+        float voltage_t;
         float temperature_c;
-        temperature_c = ((voltage - CAL_TEMPERATURE_ZERO_VOLT) /  CAL_TEMPERATURE_VOLTAGE_GAIN );
+        voltage = ((  CAL_VOLTAGE_REFERENCE *  adc_read) /  ADC_RESOLUTION );
+        voltage_t=thermocouple_voltage(voltage,CAL_TEMPERATURE_ZERO_VOLT);
+        temperature_c = lin_extrap_temp(voltage_t);
+
 
         //convert temperature
         float temperature;

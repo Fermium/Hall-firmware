@@ -3,7 +3,7 @@
    Copyright 2015 fermiumlabs.com
    All Rights Reserved
    Written by: Davide Bortolami
- */
+*/
 
 /*
    Description of gains and channels
@@ -35,8 +35,7 @@
    1101 > Cal2 = 0.9 Vcal   [decimal 13]
    1110 > Cal2 = 0.1 Vcal   [decimal 14]
    1111 > Cal2 = Vref = GND [decimal 15]
-
- */
+*/
 
 
 #ifndef Pga_h
@@ -47,19 +46,19 @@
 
 #include "Arduino.h"
 
-//this implementation use a software spi
-//shiftOut(dataPin, clockPin, bitOrder, value)
+// This implementation use a software spi
+// shiftOut(dataPin, clockPin, bitOrder, value)
 
 class PGA113 {
 
 public:
 
-//initialize the PGA given the pins
+// Initialize the PGA given the pins
         PGA113(char _p)
         {
                 _pin = _p;
 
-                //set pin to output
+                //Set pin to output
                 pinMode (_pin, OUTPUT);
                 pinMode (PGA_MOSI, OUTPUT);
                 pinMode (PGA_CLK, OUTPUT);
@@ -75,6 +74,7 @@ public:
 
                 //initialize global variables
                 //i'm to lazy to study a serious c++ solution
+
                 _gains_available[0] = 1;
                 _gains_available[1] = 2;
                 _gains_available[2] = 5;
@@ -87,7 +87,7 @@ public:
 
         }
 
-//set the gain in index form
+// Set the gain in index form
         void Set(unsigned char _G)
         {
                 unsigned char _Ch = 1;
@@ -106,33 +106,33 @@ public:
 
         }
 
-//return the actual set  gain in numerical format
+// Return the actual set  gain in numerical format
         unsigned char GetSetGain(void)
         {
                 return _gains_available[_gain_set_index];
         }
 
-//return the actual index
+// Return the actual index
         char GetSetIndex(void)
         {
                 return _gain_set_index;
         }
 
-//return the gain in numerical format
+// Return the gain in numerical format
         char GetGain(char _i)
         {
                 return _gains_available[_i];
         }
 
-//return the channel as an index as table at the start of this source code
+// Return the channel as an index as table at the start of this source code
         char GetChannel(void)
         {
 
         }
 
 private:
-        unsigned char _gains_available[8];
-        unsigned char _gain_set_index; //index of the array above
+        unsigned char _gains_available[8]/*={1,2,5,10,20,50,100,200}*/;// Array of available gains for PGA 113
+        unsigned char _gain_set_index; // Index of the array above
         unsigned char _pin;
 
 };

@@ -1,15 +1,53 @@
-#include <calibration_hall.h>
-//#include <calibration_rdt.h>
 //TODO: verificare valore adc < 4050 per resistenza e Vhall
-#include <Pga.h>
-#include <MCP3304.h>
-#include <hmi_abstraction.h>
-#include <ClickEncoder.h>
-#include <math.h>
-#include <TimerOne.h>         // TODO: change with something that is not CC-BY
-#include <LiquidCrystal.h>
-#include <K_Thermocouple_AD8435.h>
-#include <avr/pgmspace.h>
+
+/*
+Experiment type
+*/
+#define HALL
+
+
+/*
+Calibration values for Hall Effect Experiment
+*/
+#ifdef HALL
+#include <calibration_hall.h>
+#endif
+
+
+/*
+Calibration values for RDT Experiment
+*/
+#ifdef RDT
+#include <calibration_rdt.h>
+#endif
+
+/*
+Standard C++ libraries includes
+*/
+#include <math.h> 
+
+
+/*
+Other libraries includes
+*/
+#include <Pga.h>                   // PGA library
+#include <MCP3304.h>               // ADC library
+#include <hmi_abstraction.h>       // LCD Monitor Abstraction library
+#include <ClickEncoder.h>          // Clickable Encoder library
+#include <TimerOne.h>              // TODO: change with something that is not CC-BY
+//#include <LiquidCrystal.h>         // LCD Monitor library  To Be Deleted probably
+#include <K_Thermocouple_AD8435.h> // Thermocouple Values Correction library
+#include <avr/pgmspace.h>          // 
+
+
+/*
+ PIN | ATMEGA328 | 
+ 19  |    PC5    |
+  8  |    PB0    |
+  7  |    PD7    |
+  9  |    PB1    |
+ 
+*/
 
 //initialize PGAs
 MCP3304 adc(19);   //atmega328 PC5
@@ -147,12 +185,12 @@ void debug(char* debug_msg){
 char mode_3(int increment)
 {
         float voltage;
-        voltage = (( CAL_VOLTAGE_REFERENCE * adc.read(ADC_CHANNEL_VR) ) / ADC_RESOLUTION );
+        voltage = (( CAL_VOLTAGE_REFERENCE * adc.read(ADC_CHANNEL_VR,true) ) / ADC_RESOLUTION );
         voltage /= pga_vr.GetSetGain() * CAL_FIXED_GAIN_VRES; //compensate for PGA and OPAMP gain
         unsigned int adc_read;
-        adc_read=adc.read(ADC_CHANNEL_VR);
+        adc_read=adc.read(ADC_CHANNEL_VR,true);
         float current;
-        current = ((( CAL_VOLTAGE_REFERENCE * adc.read(ADC_CHANNEL_CURRENT) ) / ADC_RESOLUTION ) / CAL_SHUNT_RESISTOR );
+        current = ((( CAL_VOLTAGE_REFERENCE * adc.read(ADC_CHANNEL_CURRENT,true) ) / ADC_RESOLUTION ) / CAL_SHUNT_RESISTOR );
 
         float resistance;
         resistance = voltage / current;
@@ -233,7 +271,7 @@ char mode_5(int increment)
 
 
         int adc_read;
-        adc_read = adc.read(ADC_CHANNEL_TEMP);
+        adc_read = adc.read(ADC_CHANNEL_TEMP,true);
 
 
         float voltage;
@@ -314,7 +352,7 @@ char mode_7(int increment)
 
         char teemp[10];
         int tempreading;
-        tempreading = adc.read(ADC_CHANNEL_VH);
+        tempreading = adc.read(ADC_CHANNEL_VH,true);
 
         voltage = (( CAL_VOLTAGE_REFERENCE * (float)tempreading ) / ADC_RESOLUTION );//voltage in the adc input
         voltage -= CAL_HALL_ZERO_VOLTAGE;

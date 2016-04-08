@@ -4,8 +4,6 @@
 */
 
 
-#define APPARATUS_HALL
-
 
 /*
   ADC Channels Definitions

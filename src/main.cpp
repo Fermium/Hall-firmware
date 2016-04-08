@@ -36,11 +36,11 @@ void debug(char*);
 char overTemp()
 {
         float voltage;
-        float voltage_t;
+        float voltaget;
         float temperature;
         voltage = (( CAL_VOLTAGE_REFERENCE * adc.read(ADC_CHANNEL_TEMP) ) / ADC_RESOLUTION );
-        voltage_t=thermocouple_voltage(voltage,CAL_TEMPERATURE_ZERO_VOLT);
-        temperature = lin_extrap_temp(voltage_t);
+        voltaget=thermocouple_voltage(voltage,CAL_TEMPERATURE_ZERO_VOLT);
+        temperature = lin_extrap_temp(voltaget);
         if ( temperature >= CAL_TEMPERATURE_OVERHEAT_LIMIT ) { //If overheating
 
                 hmi.Buzzer(true);
@@ -235,11 +235,11 @@ char mode_5(int increment)
 
 
         float voltage;
-        float voltage_t;
+        float voltaget;
         float temperature_c;
         voltage = ((  CAL_VOLTAGE_REFERENCE *  adc_read) /  ADC_RESOLUTION );
-        voltage_t=thermocouple_voltage(voltage,CAL_TEMPERATURE_ZERO_VOLT);
-        temperature_c = lin_extrap_temp(voltage_t);
+        voltaget=thermocouple_voltage(voltage,CAL_TEMPERATURE_ZERO_VOLT);
+        temperature_c = lin_extrap_temp(voltaget);
 
 
         //convert temperature

@@ -71,11 +71,11 @@ public:
         {
                 for (char row = 0; row != LCD_HEIGHT; row++)
                 {
-                   /* for (char column=0; column != LCD_LENGHT; column++)
+                    for (char column=0; column != LCD_LENGHT; column++)
                     {
                             _LCD_array[column][row][1] = ' ';
-                    }*/
-                    Clean(0,LCD_LENGHT,row);
+                    }
+                    //Clean(0,LCD_LENGHT,row);
                 }
         }
 

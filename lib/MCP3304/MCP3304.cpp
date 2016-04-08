@@ -5,7 +5,7 @@
 #define ADC_MISO 12    // ADC_MISO
 #define SPI_CLK 13  // Clock
 #define ADC_CS 19
-#define STACK_SIZE 10 //size of stacks maxtrix for reads
+//#define STACK_SIZE 10 //size of stacks maxtrix for reads
 
 void MCP3304::init (void) {
 								static int i=0;
@@ -21,7 +21,7 @@ void MCP3304::init (void) {
 								delayMicroseconds(50);
 								digitalWrite(ADC_CS, HIGH);
 								for(i=0; i<8; i++) {
-																stacks[i]=(int*)malloc(STACK_SIZE*sizeof(int));
+																
 																ht_stacks[i][0]=0;
 																ht_stacks[i][1]=0;
 								}
@@ -111,10 +111,10 @@ void MCP3304::stack_value(int value,int channel) {
 }
 
 int MCP3304::mean_value(int channel) {
-								float value;
+								float value=0;
 								int i=0;
 								for(i=0; i<STACK_SIZE; i++) {
-																value=(float)stacks[channel][i];
+																value+=(float)stacks[channel][i];
 								}
 								value/=(float)ht_stacks[channel][1];
 								return (int)round(value);

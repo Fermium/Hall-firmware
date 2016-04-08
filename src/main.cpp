@@ -106,9 +106,9 @@ char mode_1(int increment)
 {
         //calculate current (yes, Ohm's law)
         float current;
-        current = ((( CAL_VOLTAGE_REFERENCE * adc.read(ADC_CHANNEL_CURRENT) ) / ADC_RESOLUTION ) / CAL_SHUNT_RESISTOR );
+        current = ((( CAL_VOLTAGE_REFERENCE * adc.read(ADC_CHANNEL_CURRENT,true) ) / ADC_RESOLUTION ) / CAL_SHUNT_RESISTOR );
         unsigned int adc_read;
-        adc_read=adc.read(ADC_CHANNEL_CURRENT);
+        adc_read=adc.read(ADC_CHANNEL_CURRENT,true);
         current *= 1000; //Current is now in mA, not Amps
         if(adc_read>ADC_OVERLOAD_VALUE_LSB) {
                 hmi.Clean(0,9,0);
@@ -166,6 +166,7 @@ char mode_3(int increment)
                 return 4;
         }
         //split floating number into separated integer and floating part
+        
         unsigned int integer_part;
         integer_part = trunc(resistance);
         unsigned int floating_part;
@@ -174,7 +175,8 @@ char mode_3(int increment)
         //generate format for the next sprintf,example %d.%02d using the calculated number of decimals
         char format[10];
         if(dec_prec!=0) {
-                sprintf_P(format,PSTR("%%d.%%0%dd"), dec_prec);
+                sprintf_P(format, PSTR("%%d.%%0%dd"), dec_prec);
+                
                 sprintf(temp_string_10chars, format, integer_part, floating_part);
         }
         else {
@@ -329,8 +331,10 @@ char mode_7(int increment)
                 return 8;
         }
         //split floating number into separated integer and floating part
+        char sgn=(voltage<0)?-1:1;
         unsigned int integer_part;
-        integer_part = trunc(voltage );
+        integer_part = sgn*trunc(voltage );
+        
         unsigned int floating_part;
         floating_part= abs((voltage  - integer_part) * pow(10, dec_prec));
 
@@ -338,6 +342,10 @@ char mode_7(int increment)
         //generate format for the next sprintf, example %d.%02d using the calculated number of decimals
         if(dec_prec!=0) {
                 sprintf_P(format, PSTR("%%d.%%0%dd"), dec_prec);
+                if(sgn<0){
+                        sprintf_P(format, PSTR("%c%%d.%%0%dd"),'-', dec_prec);
+                        
+                }
                 sprintf(temp_string_10chars, format, integer_part, floating_part);
         }
         else {
@@ -424,7 +432,9 @@ void loop()
 
         //number of rotations of the encoder
         encoder_notches = -encoder->getValue();
-
+        if((cycles%3000000L)==100){
+                hmi.ForceRewrite();
+        }
         setupScreen(mode); //draw center symbols of the select mode
 
         //call the mode subroutine, pass the rotation of the encoder
@@ -467,7 +477,7 @@ void loop()
         if ( (cycles % 1000L) == 0  ) {
                 overTemp();
         }
-
+        
         //update LCD
         if ( (cycles % 2500L) == 0  ) {
                 //every now and then just update the display

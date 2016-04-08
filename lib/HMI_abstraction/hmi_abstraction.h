@@ -59,23 +59,26 @@ public:
                 digitalWrite(A1, LOW);
         }
 
-        void Clean(int col_start, int col_end, int row)
+        void Clean(int col_start, int col_end, int row,char matrix)
         {
                 for(int i=col_start; i<col_end; i++) {
-                        _LCD_array[i][row][1]=' ';
+                        _LCD_array[i][row][matrix]=' ';
                 }
         }
-
+        void Clean(int col_start, int col_end, int row)
+        {
+                Clean(col_start,col_end,row,1);
+        }
         //clean all rows, but does not force rewrite or hard clear the lcd
         void CleanAll ()
         {
                 for (char row = 0; row != LCD_HEIGHT; row++)
                 {
-                    for (char column=0; column != LCD_LENGHT; column++)
+                    /*for (char column=0; column != LCD_LENGHT; column++)
                     {
                             _LCD_array[column][row][1] = ' ';
-                    }
-                    //Clean(0,LCD_LENGHT,row);
+                    }*/
+                    Clean(0,LCD_LENGHT,row);
                 }
         }
 
@@ -83,18 +86,22 @@ public:
         void ForceRewrite ()
         {
 
-              /* POSSIBLE IMPLEMENTATION GOT TO BE CHECKED
-                 for (char column=0; column != LCD_LENGHT; column++)
+              /* POSSIBLE IMPLEMENTATION GOT TO BE CHECKED*/
+                 
+                for (char row=0; row!=LCD_HEIGHT; row++)
                 {
-                        for (char row=0; row!=LCD_HEIGHT; row++)
-                        {
+                        for (char column=0; column != LCD_LENGHT; column++)
+                       {
                           _LCD_array[column][row][1]=_LCD_array[column][row][0];
+                          
                         }
+                        Clean(0,LCD_LENGHT,row,0);
+                        _lcd_unabstracted.setCursor(0, row);
+                        _lcd_unabstracted.print(F("                    "));
                 }
-                CleanAll();
                 Update();
 
-              */
+              
         }
 
         void Buzzer(bool on)

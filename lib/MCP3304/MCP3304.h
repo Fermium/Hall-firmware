@@ -3,7 +3,7 @@
 #define MCP3304_h
 
 #include <Arduino.h>
-
+#define STACK_SIZE 10
 class MCP3304
 {
 public:
@@ -28,7 +28,7 @@ public:
 
 private:
 								void stack_value(int value,int channel);
-								int* stacks[8]; // Circual arrays for mean_value calculation
+								int stacks[8][STACK_SIZE]; // Circual arrays for mean_value calculation
 								int ht_stacks[8][2];
 								/* Heads and Sizes matrix for stacks circualr array in form of:
 								       [,0]		[,1]

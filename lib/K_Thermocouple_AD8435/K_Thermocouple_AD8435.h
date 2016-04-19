@@ -26,12 +26,10 @@ t=b0+b1*E+...+bn*E^n
 */
 float b[6]={-0.383695902,25.215123839,-0.279516961,0.072045800,-0.014094503,0.001055528};
 
-float lin_extrap_temp(float E,int precision=6){
-  int prec=constrain(0,precision,6);
+float lin_extrap_temp(float E){
   float t=0;
-  for(int i=0;i<precision;i++){
-    t+=b[i]*pow(E,i);
-  }
+  E=E*1000;
+  t=b[0]+b[1]*E+b[2]*pow(E,2)+b[3]*pow(E,3)+b[4]*pow(E,4)+b[5]*pow(E,5);
   return t;
 }
 

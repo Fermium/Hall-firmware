@@ -363,7 +363,7 @@ char mode_7(int increment)
 
         //calculate the required number of decimal digits
         int dec_prec;
-        dec_prec = floor(fabs(log10(((CAL_VOLTAGE_REFERENCE*1000.0)/(pga_vh.GetSetGain() * CAL_FIXED_GAIN_VHALL*ADC_RESOLUTION)))));
+        dec_prec = (int)(floor(fabs(log10(((CAL_VOLTAGE_REFERENCE*1000.0)/(pga_vh.GetSetGain() * CAL_FIXED_GAIN_VHALL*ADC_RESOLUTION))))));
 
         if(tempreading>ADC_OVERLOAD_VALUE_LSB_MAX || tempreading<ADC_OVERLOAD_VALUE_LSB_MIN) {
                 hmi.Clean(0,9,3);
@@ -405,7 +405,7 @@ char mode_8(int increment)
 {
         static bool firstStart = true;
 
-        static int index = 6;
+        static int index = 1;
         index = constrain( (index + increment), 0, 7);
 
         //Update PGA gain

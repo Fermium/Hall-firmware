@@ -92,13 +92,12 @@ public:
                 {
                         for (char column=0; column != LCD_LENGHT; column++)
                        {
-                          _LCD_array[column][row][1]=_LCD_array[column][row][0];
+                          _LCD_array[column][row][0]=' ';
                           
                         }
-                        Clean(0,LCD_LENGHT,row,0);
-                        _lcd_unabstracted.setCursor(0, row);
-                        _lcd_unabstracted.print(F("                    "));
+                        
                 }
+                _lcd_unabstracted.clear();
                 Update();
 
               

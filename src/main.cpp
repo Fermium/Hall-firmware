@@ -80,19 +80,16 @@ char overTemp()
         voltaget=thermocouple_voltage(voltage,CAL_TEMPERATURE_ZERO_VOLT);
         temperature = lin_extrap_temp(voltaget);
         if ( temperature >= CAL_TEMPERATURE_OVERHEAT_LIMIT ) { //If overheating
-
-                hmi.Buzzer(true);
+                        
 
                 digitalWrite(PIN_HEATER, LOW);
                 analogWrite(PIN_HEATER, 0);
-
                 return true;
         }
         else {
-
-                hmi.Buzzer(false);
                 return false;
         }
+        
 }
 
 //periodic ISR called every 1ms
@@ -148,7 +145,7 @@ char mode_1(int increment)
         unsigned int adc_read;
         adc_read=adc.read(ADC_CHANNEL_CURRENT,true);
         current *= 1000; //Current is now in mA, not Amps
-        if(adc_read>ADC_OVERLOAD_VALUE_LSB) {
+        if(adc_read>ADC_OVERLOAD_VALUE_LSB_MAX || adc_read<ADC_OVERLOAD_VALUE_LSB_MIN) {
                 hmi.Clean(0,9,0);
                 hmi.WriteString(0,0,"Overload");
                 return 5;
@@ -198,7 +195,7 @@ char mode_3(int increment)
         //calculate the required number of decimal digits
         int dec_prec;
         dec_prec = floor( -log10( fabs( CAL_VOLTAGE_REFERENCE / ( 50 * CAL_FIXED_GAIN_VRES * pga_vr.GetSetGain() ))));
-        if(adc_read>ADC_OVERLOAD_VALUE_LSB) {
+        if(adc_read>ADC_OVERLOAD_VALUE_LSB_MAX || adc_read<ADC_OVERLOAD_VALUE_LSB_MIN) {
                 hmi.Clean(0,9,1);
                 hmi.WriteString(0,1,"Overload");
                 return 4;
@@ -271,7 +268,7 @@ char mode_5(int increment)
 
 
         int adc_read;
-        adc_read = adc.read(ADC_CHANNEL_TEMP,true);
+        adc_read = adc.read(ADC_CHANNEL_TEMP,false);
 
 
         float voltage;
@@ -297,7 +294,7 @@ char mode_5(int increment)
                 break;
         }
 
-        if(adc_read > ADC_OVERLOAD_VALUE_LSB) {
+        if(adc_read>ADC_OVERLOAD_VALUE_LSB_MAX || adc_read<ADC_OVERLOAD_VALUE_LSB_MIN) {
                 hmi.Clean(0,9,2);
                 hmi.WriteString(0,2,"Overload");
                 return 5;
@@ -323,7 +320,7 @@ char mode_5(int increment)
 char mode_6(int increment)
 {
         static int power_percentage = 0;
-        power_percentage = constrain((power_percentage + increment), 0, 100);
+        power_percentage = constrain((power_percentage + increment), 0, 1);
 
         if (overTemp()) { //EMERGENCY
 
@@ -331,12 +328,17 @@ char mode_6(int increment)
                 sprintf_P(temp_string_10chars, PSTR("!! ERR !!"));
         }
         else {
-
-                sprintf_P(temp_string_10chars, PSTR("Pwr  %3d%%"), power_percentage);
+                if(power_percentage){
+                sprintf_P(temp_string_10chars, PSTR("ON"));        
+                }
+                else{
+                sprintf_P(temp_string_10chars, PSTR("OFF"));        
+                }
+                
         }
 
         char power_255;
-        power_255 = constrain( (power_percentage * 2.55 ), 0, 255);
+        power_255 = constrain( (power_percentage * 255 ), 0, 255);
 
         analogWrite(PIN_HEATER, power_255);
         hmi.Clean(11,20,2);
@@ -363,7 +365,7 @@ char mode_7(int increment)
         int dec_prec;
         dec_prec = floor(fabs(log10(((CAL_VOLTAGE_REFERENCE*1000.0)/(pga_vh.GetSetGain() * CAL_FIXED_GAIN_VHALL*ADC_RESOLUTION)))));
 
-        if(tempreading>ADC_OVERLOAD_VALUE_LSB) {
+        if(tempreading>ADC_OVERLOAD_VALUE_LSB_MAX || tempreading<ADC_OVERLOAD_VALUE_LSB_MIN) {
                 hmi.Clean(0,9,3);
                 hmi.WriteString(0,3, "Overload");
                 return 8;
@@ -439,7 +441,7 @@ char mode_8(int increment)
 
 void loop()
 {
-
+        hmi.Buzzer(true);
         static char mode = 0;
         int16_t encoder_notches = 0;
         static unsigned long int cycles = 0;         //cycles of loop since the apparatus has been powered
@@ -472,6 +474,8 @@ void loop()
         encoder_notches = -encoder->getValue();
         if((cycles%3000000L)==100){
                 hmi.ForceRewrite();
+                
+                
         }
         setupScreen(mode); //draw center symbols of the select mode
 

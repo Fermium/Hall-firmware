@@ -364,7 +364,7 @@ char mode_7(int increment)
         //calculate the required number of decimal digits
         int dec_prec;
         dec_prec = (int)(floor(fabs(log10(((CAL_VOLTAGE_REFERENCE*1000.0)/(pga_vh.GetSetGain() * CAL_FIXED_GAIN_VHALL*ADC_RESOLUTION))))));
-
+        //dec_prec=2;
         if(tempreading>ADC_OVERLOAD_VALUE_LSB_MAX || tempreading<ADC_OVERLOAD_VALUE_LSB_MIN) {
                 hmi.Clean(0,9,3);
                 hmi.WriteString(0,3, "Overload");
@@ -373,11 +373,11 @@ char mode_7(int increment)
         //split floating number into separated integer and floating part
         char sgn=(voltage<0)?-1:1;
         unsigned int integer_part;
-        integer_part = sgn*trunc(voltage );
+        integer_part = (int)(sgn*trunc(voltage ));
         
         unsigned int floating_part;
-        floating_part= abs((voltage  - integer_part) * pow(10, dec_prec));
-
+        floating_part=(int) abs((voltage  - sgn*(float)(integer_part)) * pow(10, dec_prec));
+        
         char format[10];
         //generate format for the next sprintf, example %d.%02d using the calculated number of decimals
         if(dec_prec!=0) {
@@ -389,7 +389,7 @@ char mode_7(int increment)
                 sprintf(temp_string_10chars, format, integer_part, floating_part);
         }
         else {
-                sprintf_P(temp_string_10chars, PSTR("%d"), integer_part);
+                sprintf_P(temp_string_10chars, PSTR("%d"), sgn*integer_part);
         }
 
         hmi.Clean(0,9,3);

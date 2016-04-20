@@ -13,7 +13,7 @@
 #define ADC_CHANNEL_TEMP          0
 #define ADC_CHANNEL_CURRENT       1
 #define ADC_OVERLOAD_VALUE_LSB_MAX    4000
-#define ADC_OVERLOAD_VALUE_LSB_MIN    100
+#define ADC_OVERLOAD_VALUE_LSB_MIN    10
 
 /*
   Sample Type Definition

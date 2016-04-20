@@ -97,7 +97,8 @@ public:
                         }
                         
                 }
-                _lcd_unabstracted.clear();
+                
+                _lcd_unabstracted.begin(LCD_LENGHT, LCD_HEIGHT);
                 Update();
 
               

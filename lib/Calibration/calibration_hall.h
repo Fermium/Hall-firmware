@@ -38,7 +38,7 @@ float CAL_HALL_ZERO_VOLTAGE            = 2.5;
   Temperature Calibration Values:
 */
 float CAL_TEMPERATURE_VOLTAGE_GAIN     = 0.01;    // (V/°C)
-int   CAL_TEMPERATURE_OVERHEAT_LIMIT   = 175;     // °C
+int   CAL_TEMPERATURE_OVERHEAT_LIMIT   = 170;     // °C
 
 
 /*

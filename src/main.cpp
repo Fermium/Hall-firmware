@@ -167,7 +167,8 @@ char mode_1(int increment)
 //rdt:
 char mode_2(int increment)
 {
-        hmi.WriteString(11,0,"Fermium");
+        //hmi.Clean(11,20,0);
+        //hmi.WriteString(11,0,"Fermium");
 
         return 3; //jump to next mode
 }

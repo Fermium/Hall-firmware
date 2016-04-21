@@ -162,18 +162,19 @@ char mode_1(int increment)
         hmi.WriteString(0, 0, temp_string_10chars);
         hmi.WriteString(7,0,"mA");
         
+        #
         
-        if(current > 7.5 && current < 45.0)
+        if(current > CALL_CURRENT_LIMIT_LOW && current < CALL_CURRENT_LIMIT_HIGH)
         {
                 hmi.Clean(11,20,0);
         }
-        else if (current <=7.5)
+        else if (current <= CALL_CURRENT_LIMIT_LOW)
         {
                 hmi.Clean(11,20,0);
                 sprintf_P(temp_string_10chars, PSTR("too low!"));
                 hmi.WriteString(11,0,temp_string_10chars);
         }
-        else if (current >=45.0)
+        else if (current >=CALL_CURRENT_LIMIT_HIGH)
         {
                 hmi.Clean(11,20,0);
                 sprintf_P(temp_string_10chars, PSTR("too high!"));

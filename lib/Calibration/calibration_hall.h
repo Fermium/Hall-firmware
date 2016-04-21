@@ -59,3 +59,9 @@ float CAL_FIXED_GAIN_VHALL             = 10.0;     // Opamp gain * voltage divid
 */
 float CAL_VOLTAGE_REFERENCE            = 5.0;     // Adc voltage reference
 unsigned int ADC_RESOLUTION            = 4096;
+
+/*
+  Current warning values
+*/
+float CALL_CURRENT_LIMIT_HIGH          = 25.0;
+float CALL_CURRENT_LIMIT_LOW           = 7.5;

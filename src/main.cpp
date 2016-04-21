@@ -154,9 +154,10 @@ char mode_1(int increment)
         unsigned int integer_part;
         integer_part = trunc(current);
         unsigned int floating_part;
-        floating_part = ((current - integer_part)*100);
-
-        sprintf_P(temp_string_10chars, PSTR("%d.%02d"), integer_part, floating_part);
+        floating_part = ((current - integer_part)*10);
+        
+        sprintf_P(temp_string_10chars, PSTR("%d.%01d"), integer_part, floating_part);
+        
         hmi.Clean(0,9,0);
         hmi.WriteString(0, 0, temp_string_10chars);
         hmi.WriteString(7,0,"mA");

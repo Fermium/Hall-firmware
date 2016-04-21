@@ -302,10 +302,8 @@ char mode_5(int increment)
         //split floating number into separated integer and floating part
         int integer_part;
         integer_part = temperature;
-        int floating_part;
-        floating_part =   abs((temperature - integer_part) * 10);
 
-        sprintf_P(temp_string_10chars, PSTR("%d.%01d"), integer_part, abs(floating_part));
+        sprintf_P(temp_string_10chars, PSTR("%d"), integer_part);
         hmi.Clean(0,9,2);
         hmi.WriteString(0,2, temp_string_10chars);
         char celsius[3];

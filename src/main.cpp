@@ -161,6 +161,24 @@ char mode_1(int increment)
         hmi.Clean(0,9,0);
         hmi.WriteString(0, 0, temp_string_10chars);
         hmi.WriteString(7,0,"mA");
+        
+        
+        if(current > 7.5 && current < 45.0)
+        {
+                hmi.Clean(11,20,0);
+        }
+        else if (current <=7.5)
+        {
+                hmi.Clean(11,20,0);
+                sprintf_P(temp_string_10chars, PSTR("too low!"));
+                hmi.WriteString(11,0,temp_string_10chars);
+        }
+        else if (current >=45.0)
+        {
+                hmi.Clean(11,20,0);
+                sprintf_P(temp_string_10chars, PSTR("too high!"));
+                hmi.WriteString(11,0,temp_string_10chars);
+        }
 
         return 2; //jump to next mode
 }
